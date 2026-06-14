@@ -316,7 +316,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     return () => {
       if (recognitionRef.current) recognitionRef.current.abort();
     };
-  }, [language.id, t.diseaseLabel, t.marketLabel, t.weatherLabel, t.guideLabel]);
+  }, [language.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -375,7 +375,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (isProcessing) return;
 
     if (action === t.diseaseLabel) {
-      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.diseasePrompt}`, true);
+      await processResponse(`Bhoomi here. ${t.diseasePrompt}`, true);
     } else if (action === t.marketLabel) {
       const marketData = getLocalizedMarketData(language.id);
       const dataSummary = marketData.map(d => `${d.name} is ₹${d.price}`).join(", ");
@@ -384,7 +384,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         content: "",
         type: 'market_data'
       });
-      await processResponse(`Identify yourself as Bhoomi. Summarize these market rates for the user in their language: ${dataSummary}. Then ask which specific crop rate they want to know.`, true);
+      await processResponse(`Bhoomi speaking. Mandi rates today: ${dataSummary}. Which crop do you want to track?`, true);
     } else if (action === t.weatherLabel) {
       const seasonData = getLocalizedSeasonData(language.id);
       const dataSummary = seasonData.map(d => `In ${d.season}, the best crops are ${d.crops}`).join(". ");
@@ -393,14 +393,14 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         content: "",
         type: 'weather_data'
       });
-      await processResponse(`Identify yourself as Bhoomi. Read out this seasonal crop guide in their language: ${dataSummary}. Then ask if they want to know if today is good for planting.`, true);
+      await processResponse(`Bhoomi here. Seasonal guide: ${dataSummary}. Should we check today's weather for your planting?`, true);
     } else if (action === t.guideLabel) {
       addMessage({
         role: 'assistant',
         content: "",
         type: 'guide_data'
       });
-      await processResponse(`Identify yourself as Bhoomi. Explain how I work in their language based on this: ${t.guidePrompt}`, true);
+      await processResponse(`I am Bhoomi. ${t.guidePrompt}`, true);
     } else {
       await processResponse(action);
     }
@@ -477,9 +477,9 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (msg.type === 'market_data') {
       const marketData = getLocalizedMarketData(language.id);
       return (
-        <div className="space-y-4 w-full">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-primary/10 overflow-hidden shadow-sm">
-            <Table>
+        <div className="space-y-4 w-full overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-primary/10 overflow-hidden shadow-sm w-full">
+            <Table className="w-full">
               <TableHeader className="bg-primary/5">
                 <TableRow>
                   <TableHead className="text-xs font-bold text-primary px-3">{t.cropHeader}</TableHead>
@@ -501,12 +501,12 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             <h4 className="text-[10px] font-bold text-primary/60 uppercase mb-2">{t.trendLabel}</h4>
             <div className="h-32 w-full">
               <ChartContainer config={chartConfig} className="h-full w-full">
-                <ReChartsBarChart data={marketData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                <ReChartsBarChart data={marketData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="name" fontSize={9} axisLine={false} tickLine={false} />
                   <YAxis fontSize={9} axisLine={false} tickLine={false} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="price" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={16} />
+                  <Bar dataKey="price" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={20} />
                 </ReChartsBarChart>
               </ChartContainer>
             </div>
@@ -518,9 +518,9 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (msg.type === 'weather_data') {
       const seasonData = getLocalizedSeasonData(language.id);
       return (
-        <div className="space-y-4 w-full">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-primary/10 overflow-hidden shadow-sm">
-            <Table>
+        <div className="space-y-4 w-full overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-primary/10 overflow-hidden shadow-sm w-full">
+            <Table className="w-full">
               <TableHeader className="bg-primary/5">
                 <TableRow>
                   <TableHead className="text-[10px] font-bold text-primary px-2">{t.seasonHeader}</TableHead>
@@ -561,16 +561,16 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   };
 
   return (
-    <div className="mobile-stage flex flex-col bg-white nature-bg">
+    <div className="mobile-stage flex flex-col bg-white nature-bg relative overflow-hidden">
       {/* Decorative nature background elements */}
-      <div className="absolute inset-0 pointer-events-none opacity-10">
-        <div className="absolute -top-10 -left-10 w-40 h-40 animate-sway text-primary/20">
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className="absolute -top-10 -left-10 w-48 h-48 animate-sway text-primary/20">
           <Leaf className="w-full h-full" />
         </div>
-        <div className="absolute top-1/2 -right-10 w-32 h-32 animate-float-nature text-accent/20">
+        <div className="absolute top-1/2 -right-10 w-40 h-40 animate-float-nature text-accent/20">
           <CloudSun className="w-full h-full" />
         </div>
-        <div className="absolute bottom-1/4 -left-5 w-24 h-24 animate-sway text-primary/10" style={{ animationDelay: '2s' }}>
+        <div className="absolute bottom-1/4 -left-10 w-32 h-32 animate-sway text-primary/10" style={{ animationDelay: '2s' }}>
           <Leaf className="w-full h-full" />
         </div>
       </div>
@@ -595,7 +595,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-4 gap-2 bg-white/40 backdrop-blur-sm shrink-0 z-10">
+      <div className="p-4 grid grid-cols-4 gap-2 bg-white/40 backdrop-blur-sm shrink-0 z-20">
         {[
           { icon: Leaf, label: t.disease, action: t.diseaseLabel, color: 'bg-green-100 text-green-700' },
           { icon: BarChart3, label: t.market, action: t.marketLabel, color: 'bg-amber-100 text-amber-700' },
@@ -611,16 +611,16 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         ))}
       </div>
 
-      <ScrollArea className="flex-1 p-4 bg-transparent w-full z-10">
-        <div className="space-y-6 pb-4 w-full max-w-full">
+      <ScrollArea className="flex-1 p-4 bg-transparent w-full z-10 overflow-x-hidden">
+        <div className="space-y-6 pb-6 w-full max-w-full overflow-x-hidden">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
-                className={`max-w-[90%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 break-words ${
+                className={`max-w-[88%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 break-words relative z-20 ${
                   msg.role === 'user' 
                   ? 'bg-primary text-white rounded-tr-none ml-auto' 
-                  : 'bg-white/90 backdrop-blur-md text-foreground rounded-tl-none border border-primary/10 mr-auto'
-                } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full max-w-[95%]' : ''}`}
+                  : 'bg-white/95 backdrop-blur-md text-foreground rounded-tl-none border border-primary/10 mr-auto shadow-lg'
+                } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full max-w-[94%]' : ''}`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
                   <img src={msg.imageUrl} alt="Uploaded crop" className="w-full rounded-lg mb-3 shadow-sm object-cover" />
@@ -634,13 +634,13 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
               </div>
               
               {msg.suggestions && msg.suggestions.length > 0 && !isProcessing && (
-                <div className="mt-3 flex flex-wrap gap-2 justify-start max-w-[95%]">
+                <div className="mt-3 flex flex-wrap gap-2 justify-start max-w-[92%] relative z-20">
                   {msg.suggestions.map((suggestion, idx) => (
                     <Button 
                       key={idx} 
                       variant="outline" 
                       size="sm" 
-                      className="text-[10px] h-7 rounded-full bg-white/80 backdrop-blur-sm border-primary/20 text-primary hover:bg-primary/5 hover:border-primary transition-all whitespace-normal text-left px-3"
+                      className="text-[10px] h-7 rounded-full bg-white/90 backdrop-blur-sm border-primary/20 text-primary hover:bg-primary/10 hover:border-primary transition-all whitespace-normal text-left px-3 shadow-sm"
                       onClick={() => handleAction(suggestion)}
                     >
                       {suggestion}
@@ -651,18 +651,18 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             </div>
           ))}
           {isProcessing && (
-            <div className="flex justify-start">
-              <div className="bg-white/90 backdrop-blur-md border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-sm flex items-center gap-2">
+            <div className="flex justify-start relative z-20">
+              <div className="bg-white/95 backdrop-blur-md border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-md flex items-center gap-2">
                 <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is thinking...</span>
+                <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is checking...</span>
               </div>
             </div>
           )}
-          <div ref={scrollRef} />
+          <div ref={scrollRef} className="h-4" />
         </div>
       </ScrollArea>
 
-      <div className="p-4 bg-white/60 backdrop-blur-md border-t space-y-3 shrink-0 z-20">
+      <div className="p-4 bg-white/70 backdrop-blur-md border-t space-y-3 shrink-0 z-30">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Input 
@@ -670,7 +670,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processResponse(input)}
-              className="pr-10 h-12 rounded-2xl bg-white/80 border-none focus-visible:ring-primary shadow-inner text-sm"
+              className="pr-10 h-12 rounded-2xl bg-white/90 border-primary/10 focus-visible:ring-primary shadow-inner text-sm"
               disabled={isProcessing}
             />
             <button 
