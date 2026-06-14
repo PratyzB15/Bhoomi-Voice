@@ -3,16 +3,12 @@
  * @fileOverview This file implements a Genkit flow for a voice-assisted farming consultant.
  * It handles speech-to-text input, processes it with an LLM, and provides a text response
  * along with a Text-to-Speech audio output in the user's selected regional language.
- *
- * - voiceAssistedFarmingConsultation - The main function to interact with the consultation.
- * - VoiceAssistedFarmingConsultationInput - The input type for the consultation.
- * - VoiceAssistedFarmingConsultationOutput - The return type for the consultation.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import wav from 'wav'; // For converting PCM audio to WAV
+import * as wav from 'wav';
 
 // Define input schema for the flow and prompt
 const VoiceAssistedFarmingConsultationInputSchema = z.object({
@@ -25,13 +21,13 @@ const VoiceAssistedFarmingConsultationInputSchema = z.object({
 });
 export type VoiceAssistedFarmingConsultationInput = z.infer<typeof VoiceAssistedFarmingConsultationInputSchema>;
 
-// Define the output schema for the LLM prompt (only text and follow-ups)
+// Define the output schema for the LLM prompt
 const VoiceAssistedFarmingConsultationLLMOutputSchema = z.object({
   responseText: z.string().describe("The AI's text response to the farmer's query."),
   followUpQuestions: z.array(z.string()).optional().describe("Suggested follow-up questions for the farmer."),
 });
 
-// Define the final output schema for the flow (includes audio)
+// Define the final output schema for the flow
 const VoiceAssistedFarmingConsultationOutputSchema = z.object({
   responseText: z.string().describe("The AI's text response to the farmer's query."),
   responseAudio: z.string().describe("The AI's audio response in WAV format, base64 encoded as a data URI."),
@@ -86,17 +82,17 @@ const farmingConsultantPrompt = ai.definePrompt({
 Your goal is to provide high-quality, comprehensive, and detailed advice to farmers transitioning to or practicing natural farming.
 
 STRICT LANGUAGE RULE:
-You must respond entirely and exclusively in the following language code: {{selectedLanguage}} (en=English, hi=Hindi, bn=Bengali, ta=Tamil, mr=Marathi).
+You must respond entirely and exclusively in the following language code: {{selectedLanguage}}.
 
 FORMATTING RULES (CRITICAL):
-1. DO NOT use any markdown markers like '*', '#', '_', or '\`'.
+1. DO NOT use any markdown markers like asterisks, hashes, underscores, or backticks.
 2. Use ALL-CAPS followed by a colon for subheadings (e.g., SOIL PREPARATION:).
-3. Use the '•' character for bullet points.
+3. Use the bullet character for bullet points.
 4. Every bullet point MUST start on its own brand new line.
 5. Do not indent sub-points; keep everything left-aligned.
 
 CONTENT RULES:
-1. Provide a DETAILED, INFORMATIVE, and COMPREHENSIVE response. Do not shorten or over-simplify the technical farming advice. 
+1. Provide a DETAILED, INFORMATIVE, and COMPREHENSIVE response. 
 2. Ensure the farmer gets all the necessary steps, biological reasoning, and practical tips.
 3. If the query is about a specific crop, provide detailed information about soil, irrigation, seeds, and pest control.
 
@@ -162,12 +158,6 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
   }
 );
 
-/**
- * Initiates a voice-assisted farming consultation.
- *
- * @param input - The input containing the farmer's transcribed query, selected language, and optional chat history.
- * @returns A promise that resolves to the AI's text and audio response, along with suggested follow-up questions.
- */
 export async function voiceAssistedFarmingConsultation(
   input: VoiceAssistedFarmingConsultationInput
 ): Promise<VoiceAssistedFarmingConsultationOutput> {

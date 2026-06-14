@@ -102,7 +102,7 @@ const UI_STRINGS: Record<string, any> = {
     diseaseLabel: "நோய் அடையாளம்",
     marketLabel: "சந்தை விலைகள்",
     weatherLabel: "வானிலை முன்னறிவிப்பு",
-    guideLabel: "உதவி வழிகாட்டி"
+    guideLabel: "உதவி வழিকাட்டி"
   },
   mr: { 
     appName: "भूमी व्हॉइस", 
@@ -163,7 +163,16 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = language.id === 'en' ? 'en-US' : language.id === 'hi' ? 'hi-IN' : language.id === 'bn' ? 'bn-BD' : language.id === 'ta' ? 'ta-IN' : 'mr-IN';
+        
+        // Use proper locale codes for Indian regions
+        const localeMap: Record<string, string> = {
+          en: 'en-US',
+          hi: 'hi-IN',
+          bn: 'bn-IN',
+          ta: 'ta-IN',
+          mr: 'mr-IN'
+        };
+        recognitionRef.current.lang = localeMap[language.id] || 'en-US';
 
         recognitionRef.current.onresult = (event: any) => {
           const text = event.results[0][0].transcript;
@@ -171,12 +180,17 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           processResponse(text);
         };
 
+        recognitionRef.current.onerror = (event: any) => {
+          console.error("Speech Recognition Error:", event.error);
+          setIsRecording(false);
+        };
+
         recognitionRef.current.onend = () => {
           setIsRecording(false);
         };
       }
     }
-  }, [language, t]);
+  }, [language, greetings, t]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -200,7 +214,8 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   };
 
   const processResponse = useCallback(async (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim() || isProcessing) return;
+    
     setIsProcessing(true);
     addMessage({ role: 'user', content: text });
     setInput('');
@@ -230,14 +245,24 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     } finally {
       setIsProcessing(false);
     }
-  }, [language, messages, t]);
+  }, [language, messages, t, isProcessing]);
 
   const toggleRecording = () => {
+    if (!recognitionRef.current) {
+      alert("Speech recognition is not supported in your browser.");
+      return;
+    }
+    
     if (isRecording) {
-      recognitionRef.current?.stop();
+      recognitionRef.current.stop();
     } else {
       setIsRecording(true);
-      recognitionRef.current?.start();
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        console.error("Failed to start recognition", e);
+        setIsRecording(false);
+      }
     }
   };
 
@@ -276,8 +301,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       const trimmedLine = line.trim();
       if (!trimmedLine) return <div key={i} className="h-2" />;
 
-      // Detect subheadings (Uppercase ending with colon)
-      // matches things like "SOIL PREPARATION:"
       if (trimmedLine.match(/^[A-Z\s]+:$/)) {
         return (
           <div key={i} className="font-bold text-primary mt-6 mb-2 uppercase tracking-widest text-xs border-b border-primary/20 pb-1.5">
@@ -286,24 +309,22 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         );
       }
 
-      // Detect bullet points
-      if (trimmedLine.startsWith('•')) {
+      if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
+        const text = trimmedLine.startsWith('•') ? trimmedLine.substring(1).trim() : trimmedLine.substring(1).trim();
         return (
           <div key={i} className="flex gap-3 ml-1 my-2.5 items-start">
             <span className="text-primary mt-1 text-base">•</span>
-            <span className="text-sm leading-relaxed text-foreground font-medium">{trimmedLine.substring(1).trim()}</span>
+            <span className="text-sm leading-relaxed text-foreground font-medium">{text}</span>
           </div>
         );
       }
 
-      // Standard paragraph
       return <p key={i} className="text-sm leading-relaxed my-2 text-foreground/90">{trimmedLine}</p>;
     });
   };
 
   return (
     <div className="mobile-stage flex flex-col bg-white">
-      {/* App Header */}
       <div className="p-4 flex items-center justify-between border-b bg-primary text-white z-10">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => window.location.reload()}>
@@ -324,7 +345,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </div>
 
-      {/* Quick Access Tiles */}
       <div className="p-4 grid grid-cols-4 gap-2 bg-muted/30">
         {[
           { icon: Leaf, label: t.disease, action: t.diseaseLabel, color: 'bg-green-100 text-green-700' },
@@ -332,7 +352,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           { icon: CloudSun, label: t.weather, action: t.weatherLabel, color: 'bg-blue-100 text-blue-700' },
           { icon: HelpCircle, label: t.guide, action: t.guideLabel, color: 'bg-purple-100 text-purple-700' }
         ].map((item, idx) => (
-          <button key={idx} onClick={() => handleAction(item.action)} className="flex flex-col items-center gap-1 group">
+          <button key={idx} onClick={() => handleAction(item.action)} className="flex flex-col items-center gap-1 group" disabled={isProcessing}>
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center group-active:scale-95 transition-transform ${item.color}`}>
               <item.icon className="w-5 h-5" />
             </div>
@@ -341,7 +361,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         ))}
       </div>
 
-      {/* Chat Area */}
       <ScrollArea className="flex-1 p-4 bg-[#F9FBF8]">
         <div className="space-y-6">
           {messages.map((msg) => (
@@ -361,7 +380,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                 </div>
               </div>
               
-              {msg.suggestions && msg.suggestions.length > 0 && (
+              {msg.suggestions && msg.suggestions.length > 0 && !isProcessing && (
                 <div className="mt-3 flex flex-wrap gap-2 justify-start">
                   {msg.suggestions.map((suggestion, idx) => (
                     <Button 
@@ -390,7 +409,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </ScrollArea>
 
-      {/* Input Area */}
       <div className="p-4 bg-white border-t space-y-3">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -400,10 +418,12 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processResponse(input)}
               className="pr-10 h-12 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary shadow-inner"
+              disabled={isProcessing}
             />
             <button 
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
               onClick={() => fileInputRef.current?.click()}
+              disabled={isProcessing}
             >
               <Paperclip className="w-5 h-5" />
             </button>
@@ -419,6 +439,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             size="icon" 
             className={`h-12 w-12 rounded-2xl shadow-lg transition-all ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-primary'}`}
             onClick={input ? () => processResponse(input) : toggleRecording}
+            disabled={isProcessing}
           >
             {input ? <Send className="w-5 h-5" /> : (isRecording ? <Square className="w-5 h-5" /> : <Mic className="w-5 h-5" />)}
           </Button>
@@ -428,7 +449,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
             <Leaf className="w-3 h-3 text-primary/60" /> {t.verified}
           </p>
-          <button className="text-[10px] text-primary font-bold hover:underline" onClick={() => handleAction(t.marketLabel)}>
+          <button className="text-[10px] text-primary font-bold hover:underline" onClick={() => handleAction(t.marketLabel)} disabled={isProcessing}>
             {t.liveRates}
           </button>
         </div>
