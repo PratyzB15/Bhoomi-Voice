@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Globe, Leaf, ArrowRight } from 'lucide-react';
@@ -15,9 +15,19 @@ const LANGUAGES = [
   { id: 'mr', label: 'Marathi', native: 'मराठी', flowCode: 'marathi' }
 ];
 
+const TRANSLATIONS: Record<string, any> = {
+  en: { title: "Bhoomi Voice", subtitle: "Your Natural Farming Companion", choose: "Choose your language", start: "Start Journey", footer: "Empowering farmers through AI & Empathy" },
+  hi: { title: "भूमि वॉइस", subtitle: "आपका प्राकृतिक खेती साथी", choose: "अपनी भाषा चुनें", start: "यात्रा शुरू करें", footer: "एआई और सहानुभूति के माध्यम से किसानों को सशक्त बनाना" },
+  bn: { title: "ভূমি ভয়েস", subtitle: "আপনার প্রাকৃতিক চাষের সঙ্গী", choose: "আপনার ভাষা চয়ন করুন", start: "যাত্রা শুরু করুন", footer: "AI এবং সহানুভূতির মাধ্যমে কৃষকদের ক্ষমতায়ন" },
+  ta: { title: "பூமி வாய்ஸ்", subtitle: "உங்கள் இயற்கை விவசாயத் தோழன்", choose: "உங்கள் மொழியைத் தேர்வுசெய்க", start: "பயணத்தைத் தொடங்குங்கள்", footer: "AI மற்றும் பச்சாதாபம் மூலம் விவசாயிகளுக்கு அதிகாரம் அளித்தல்" },
+  mr: { title: "भूमी व्हॉइस", subtitle: "तुमचा नैसर्गिक शेती सोबती", choose: "आपली भाषा निवडा", start: "प्रवास सुरू करा", footer: "AI आणि सहानुभूतीद्वारे शेतकऱ्यांना सक्षम करणे" }
+};
+
 export function LandingClient() {
   const [selectedLang, setSelectedLang] = useState<typeof LANGUAGES[0] | null>(null);
   const [isStarted, setIsStarted] = useState(false);
+
+  const t = selectedLang ? TRANSLATIONS[selectedLang.id] : TRANSLATIONS.en;
 
   if (isStarted && selectedLang) {
     return <BhoomiApp language={selectedLang} />;
@@ -36,16 +46,16 @@ export function LandingClient() {
               <Leaf className="w-12 h-12 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-4xl font-headline text-primary mb-2">Bhoomi Voice</CardTitle>
+          <CardTitle className="text-4xl font-headline text-primary mb-2">{t.title}</CardTitle>
           <CardDescription className="text-lg text-muted-foreground">
-            Your Natural Farming Companion
+            {t.subtitle}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <div className="space-y-3">
             <label className="text-sm font-medium flex items-center gap-2 text-primary/80">
               <Globe className="w-4 h-4" />
-              Choose your language
+              {t.choose}
             </label>
             <div className="grid grid-cols-2 gap-3">
               {LANGUAGES.map((lang) => (
@@ -71,14 +81,14 @@ export function LandingClient() {
             disabled={!selectedLang}
             onClick={() => setIsStarted(true)}
           >
-            Start Journey
+            {t.start}
             <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </CardContent>
       </Card>
       
       <p className="text-center mt-6 text-sm text-primary/40 font-medium">
-        Empowering farmers through AI & Empathy
+        {t.footer}
       </p>
     </div>
   );

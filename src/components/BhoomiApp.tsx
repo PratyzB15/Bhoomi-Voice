@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
   Mic, 
   Send, 
-  Image as ImageIcon, 
   Leaf, 
   CloudSun, 
   LineChart, 
@@ -16,13 +15,11 @@ import {
   Paperclip,
   ChevronLeft,
   Volume2,
-  Loader2
+  Loader2,
+  Square
 } from 'lucide-react';
 import { voiceAssistedFarmingConsultation } from '@/ai/flows/voice-assisted-farming-consultation';
 import { cropDiseaseImageAnalysis } from '@/ai/flows/crop-disease-image-analysis';
-import { intelligentGuidanceAndSuggestions } from '@/ai/flows/intelligent-guidance-and-suggestions';
-import { explainMultilevelFarming } from '@/ai/flows/multilevel-farming-education';
-import { regionalFarmingDataRetrieval } from '@/ai/flows/regional-farming-data-retrieval';
 
 type Message = {
   id: string;
@@ -31,7 +28,6 @@ type Message = {
   type?: 'text' | 'image' | 'audio';
   imageUrl?: string;
   suggestions?: string[];
-  isLoading?: boolean;
 };
 
 interface BhoomiAppProps {
@@ -43,6 +39,89 @@ interface BhoomiAppProps {
   };
 }
 
+const UI_STRINGS: Record<string, any> = {
+  en: { 
+    appName: "Bhoomi Voice", 
+    disease: "Disease", 
+    market: "Market", 
+    weather: "Weather", 
+    guide: "Guide", 
+    placeholder: "Ask anything...", 
+    verified: "Verified", 
+    liveRates: "Live Rates",
+    error: "I'm sorry, I encountered an error.",
+    analyzing: "Checking crop health...",
+    diseaseLabel: "Disease Identification",
+    marketLabel: "Market Prices",
+    weatherLabel: "Weather Forecast",
+    guideLabel: "Help Guide"
+  },
+  hi: { 
+    appName: "भूमि वॉइस", 
+    disease: "रोग", 
+    market: "बाजार", 
+    weather: "मौसम", 
+    guide: "सहायता", 
+    placeholder: "कुछ भी पूछें...", 
+    verified: "सत्यापित", 
+    liveRates: "ताजा दर",
+    error: "क्षमा करें, मुझे एक त्रुटि मिली।",
+    analyzing: "फसल के स्वास्थ्य की जाँच हो रही है...",
+    diseaseLabel: "रोग पहचान",
+    marketLabel: "बाजार भाव",
+    weatherLabel: "मौसम का पूर्वानुमान",
+    guideLabel: "सहायता मार्गदर्शिका"
+  },
+  bn: { 
+    appName: "ভূমি ভয়েস", 
+    disease: "রোগ", 
+    market: "বাজার", 
+    weather: "আবহাওয়া", 
+    guide: "গাইড", 
+    placeholder: "কিছু জিজ্ঞাসা করুন...", 
+    verified: "যাচাইকৃত", 
+    liveRates: "লাইভ রেট",
+    error: "দুঃখিত, আমি একটি ত্রুটির সম্মুখীন হয়েছি।",
+    analyzing: "ফসলের স্বাস্থ্য পরীক্ষা করা হচ্ছে...",
+    diseaseLabel: "রোগ শনাক্তকরণ",
+    marketLabel: "বাজার দর",
+    weatherLabel: "আবহাওয়ার পূর্বাভাস",
+    guideLabel: "সাহায্য নির্দেশিকা"
+  },
+  ta: { 
+    appName: "பூமி வாய்ஸ்", 
+    disease: "நோய்", 
+    market: "சந்தை", 
+    weather: "வானிலை", 
+    guide: "வழிகாட்டி", 
+    placeholder: "எதையும் கேளுங்கள்...", 
+    verified: "சரிபார்க்கப்பட்டது", 
+    liveRates: "நேரடி விலைகள்",
+    error: "மன்னிக்கவும், நான் ஒரு பிழையைச் சந்தித்தேன்.",
+    analyzing: "பயிர் ஆரோக்கியத்தை சரிபார்க்கிறது...",
+    diseaseLabel: "நோய் அடையாளம்",
+    marketLabel: "சந்தை விலைகள்",
+    weatherLabel: "வானிலை முன்னறிவிப்பு",
+    guideLabel: "உதவி வழிகாட்டி"
+  },
+  mr: { 
+    appName: "भूमी व्हॉइस", 
+    disease: "रोग", 
+    market: "बाजार", 
+    weather: "हवामान", 
+    guide: "मार्गदर्शक", 
+    placeholder: "काहीही विचारा...", 
+    verified: "सत्यापित", 
+    liveRates: "थेट दर",
+    error: "क्षमस्व, मला एक त्रुटी आली.",
+    analyzing: "पिकाच्या आरोग्याची तपासणी होत आहे...",
+    diseaseLabel: "रोग ओळख",
+    marketLabel: "बाजार भाव",
+    weatherLabel: "हवामान अंदाज",
+    guideLabel: "मदत मार्गदर्शक"
+  }
+};
+
 export function BhoomiApp({ language }: BhoomiAppProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -51,6 +130,9 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  const t = UI_STRINGS[language.id] || UI_STRINGS.en;
 
   const greetings: Record<string, string> = {
     en: "Hi, what can I help you with?",
@@ -67,20 +149,41 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         role: 'assistant',
         content: greetings[language.id] || greetings.en,
         suggestions: [
-          "Disease Identification",
-          "Market Prices",
-          "Government Subsidies",
-          "Natural Farming Tips"
+          t.diseaseLabel,
+          t.marketLabel,
+          "PM Kisan Scheme",
+          "Organic Fertilizer"
         ]
       }
     ]);
-  }, [language]);
+
+    // Initialize Speech Recognition
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = language.id === 'en' ? 'en-US' : language.id === 'hi' ? 'hi-IN' : language.id === 'bn' ? 'bn-BD' : language.id === 'ta' ? 'ta-IN' : 'mr-IN';
+
+        recognitionRef.current.onresult = (event: any) => {
+          const text = event.results[0][0].transcript;
+          setInput(text);
+          processResponse(text);
+        };
+
+        recognitionRef.current.onend = () => {
+          setIsRecording(false);
+        };
+      }
+    }
+  }, [language, t]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, isProcessing]);
 
   const playAudio = (base64Audio: string) => {
     if (audioRef.current) {
@@ -97,17 +200,11 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     return newMsg.id;
   };
 
-  const handleVoiceInput = async () => {
-    setIsRecording(true);
-    setTimeout(() => {
-      setIsRecording(false);
-      if (!input) setInput("Tell me about natural farming");
-    }, 2000);
-  };
-
-  const processResponse = async (text: string) => {
+  const processResponse = useCallback(async (text: string) => {
+    if (!text.trim()) return;
     setIsProcessing(true);
     addMessage({ role: 'user', content: text });
+    setInput('');
     
     try {
       const result = await voiceAssistedFarmingConsultation({
@@ -130,10 +227,18 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       }
     } catch (error) {
       console.error(error);
-      addMessage({ role: 'assistant', content: "I'm sorry, I encountered an error. Please try again." });
+      addMessage({ role: 'assistant', content: t.error });
     } finally {
       setIsProcessing(false);
-      setInput('');
+    }
+  }, [language, messages, t]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+    } else {
+      setIsRecording(true);
+      recognitionRef.current?.start();
     }
   };
 
@@ -144,7 +249,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     const reader = new FileReader();
     reader.onload = async () => {
       const dataUri = reader.result as string;
-      addMessage({ role: 'user', content: "Checking crop health...", type: 'image', imageUrl: dataUri });
+      addMessage({ role: 'user', content: t.analyzing, type: 'image', imageUrl: dataUri });
       
       setIsProcessing(true);
       try {
@@ -155,7 +260,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         
         addMessage({ role: 'assistant', content: result.responseInSelectedLanguage });
       } catch (error) {
-        addMessage({ role: 'assistant', content: "Failed to analyze image." });
+        addMessage({ role: 'assistant', content: t.error });
       } finally {
         setIsProcessing(false);
       }
@@ -164,7 +269,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   };
 
   const handleAction = async (action: string) => {
-    setInput(action);
     await processResponse(action);
   };
 
@@ -177,7 +281,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             <ChevronLeft className="w-6 h-6" />
           </Button>
           <div>
-            <h2 className="font-headline text-lg leading-tight">Bhoomi Voice</h2>
+            <h2 className="font-headline text-lg leading-tight">{t.appName}</h2>
             <p className="text-[10px] opacity-70 tracking-widest uppercase">{language.label}</p>
           </div>
         </div>
@@ -193,29 +297,29 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
       {/* Quick Access Tiles */}
       <div className="p-4 grid grid-cols-4 gap-2 bg-muted/30">
-        <button onClick={() => handleAction("Disease Identification")} className="flex flex-col items-center gap-1">
-          <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-700">
+        <button onClick={() => handleAction(t.diseaseLabel)} className="flex flex-col items-center gap-1 group">
+          <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-700 group-active:scale-95 transition-transform">
             <Leaf className="w-5 h-5" />
           </div>
-          <span className="text-[9px] font-bold text-center">Disease</span>
+          <span className="text-[9px] font-bold text-center">{t.disease}</span>
         </button>
-        <button onClick={() => handleAction("Market Prices")} className="flex flex-col items-center gap-1">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
+        <button onClick={() => handleAction(t.marketLabel)} className="flex flex-col items-center gap-1 group">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 group-active:scale-95 transition-transform">
             <LineChart className="w-5 h-5" />
           </div>
-          <span className="text-[9px] font-bold text-center">Market</span>
+          <span className="text-[9px] font-bold text-center">{t.market}</span>
         </button>
-        <button onClick={() => handleAction("Weather Forecast")} className="flex flex-col items-center gap-1">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700">
+        <button onClick={() => handleAction(t.weatherLabel)} className="flex flex-col items-center gap-1 group">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 group-active:scale-95 transition-transform">
             <CloudSun className="w-5 h-5" />
           </div>
-          <span className="text-[9px] font-bold text-center">Weather</span>
+          <span className="text-[9px] font-bold text-center">{t.weather}</span>
         </button>
-        <button onClick={() => handleAction("Help Guide")} className="flex flex-col items-center gap-1">
-          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-700">
+        <button onClick={() => handleAction(t.guideLabel)} className="flex flex-col items-center gap-1 group">
+          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-700 group-active:scale-95 transition-transform">
             <HelpCircle className="w-5 h-5" />
           </div>
-          <span className="text-[9px] font-bold text-center">Guide</span>
+          <span className="text-[9px] font-bold text-center">{t.guide}</span>
         </button>
       </div>
 
@@ -272,7 +376,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Input 
-              placeholder="Ask anything..." 
+              placeholder={t.placeholder} 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processResponse(input)}
@@ -295,18 +399,18 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           <Button 
             size="icon" 
             className={`h-12 w-12 rounded-2xl shadow-lg transition-all ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-primary'}`}
-            onClick={input ? () => processResponse(input) : handleVoiceInput}
+            onClick={input ? () => processResponse(input) : toggleRecording}
           >
-            {input ? <Send className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {input ? <Send className="w-5 h-5" /> : (isRecording ? <Square className="w-5 h-5" /> : <Mic className="w-5 h-5" />)}
           </Button>
         </div>
         
         <div className="flex justify-between items-center px-1">
           <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-            <Leaf className="w-3 h-3" /> Natural Farming Data Verified
+            <Leaf className="w-3 h-3" /> {t.verified}
           </p>
-          <button className="text-[10px] text-primary font-bold hover:underline" onClick={() => handleAction("Show current market prices")}>
-            Live Rates
+          <button className="text-[10px] text-primary font-bold hover:underline" onClick={() => handleAction(t.marketLabel)}>
+            {t.liveRates}
           </button>
         </div>
       </div>
