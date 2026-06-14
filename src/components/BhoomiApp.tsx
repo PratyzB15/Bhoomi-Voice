@@ -98,26 +98,25 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   };
 
   const handleVoiceInput = async () => {
-    // Simulate STT for this prototype, as full Web Speech API requires more complex browser setup
-    // In a real app, we'd use navigator.mediaDevices.getUserMedia and SpeechRecognition
     setIsRecording(true);
     setTimeout(() => {
       setIsRecording(false);
-      // Dummy transcription for demo if empty
       if (!input) setInput("Tell me about natural farming");
     }, 2000);
   };
 
   const processResponse = async (text: string) => {
     setIsProcessing(true);
-    const userMsgId = addMessage({ role: 'user', content: text });
+    addMessage({ role: 'user', content: text });
     
     try {
-      // Use the comprehensive voice flow which includes audio
       const result = await voiceAssistedFarmingConsultation({
         userInputText: text,
         selectedLanguage: language.id as any,
-        chatHistory: messages.map(m => ({ role: m.role as any, content: m.content }))
+        chatHistory: messages.map(m => ({ 
+          role: m.role === 'assistant' ? 'model' : 'user', 
+          content: m.content 
+        }))
       });
 
       addMessage({ 
