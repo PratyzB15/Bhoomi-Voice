@@ -134,8 +134,8 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
       } catch (e: any) {
         attempts++;
         if (attempts >= maxAttempts) throw e;
-        // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, 1500 * attempts));
+        // Faster backoff to stay within total timeout
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
       }
     }
 
@@ -168,7 +168,7 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
         audioDataUri = 'data:audio/wav;base64,' + wavBase64;
       }
     } catch (audioError) {
-      // We don't throw here to ensure the text reaches the user even if TTS fails or times out
+      // Silence audio error to ensure text reaches the user
     }
 
     return {
