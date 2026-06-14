@@ -126,7 +126,7 @@ const GREETINGS: Record<string, string> = {
   en: "Hi, what can I help you with?",
   hi: "नमस्ते, मैं आपकी क्या मदद कर सकता हूँ?",
   bn: "হাই, আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
-  ta: "வணக்கம், நான் உங்களுக்கு எப்படி உதவ முடியும்?",
+  ta: "வணக்கம், நான் உங்களுக்கு कैसे உதவ முடியும்?",
   mr: "नमस्कार, मी तुम्हाला कशी मदत करू शकतो?"
 };
 
@@ -196,7 +196,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         recognitionRef.current.abort();
       }
     };
-  }, [language.id, t.diseaseLabel, t.marketLabel, t.weatherLabel, t.guideLabel]);
+  }, [language.id, t.diseaseLabel, t.marketLabel]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -309,7 +309,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       if (!trimmedLine) return <div key={i} className="h-2" />;
 
       // Subheading Detection: ALL-CAPS followed by colon
-      if (trimmedLine.match(/^[A-Z\s]+:$/)) {
+      if (trimmedLine.match(/^[A-Z\s\u0900-\u097F\u0980-\u09FF\u0B80-\u0BFF\u0C00-\u0C7F]+:$/)) {
         return (
           <div key={i} className="font-bold text-primary mt-6 mb-2 uppercase tracking-widest text-xs border-b border-primary/20 pb-1.5">
             {trimmedLine}
