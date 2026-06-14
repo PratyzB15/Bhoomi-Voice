@@ -102,7 +102,7 @@ const UI_STRINGS: Record<string, any> = {
     diseaseLabel: "நோய் அடையாளம்",
     marketLabel: "சந்தை விலைகள்",
     weatherLabel: "வானிலை முன்னறிவிப்பு",
-    guideLabel: "உதவி வழিকাட்டி"
+    guideLabel: "உதவி வழிகாட்டி"
   },
   mr: { 
     appName: "भूमी व्हॉइस", 
@@ -122,6 +122,14 @@ const UI_STRINGS: Record<string, any> = {
   }
 };
 
+const GREETINGS: Record<string, string> = {
+  en: "Hi, what can I help you with?",
+  hi: "नमस्ते, मैं आपकी क्या मदद कर सकता हूँ?",
+  bn: "হাই, আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
+  ta: "வணக்கம், நான் உங்களுக்கு எப்படி உதவ முடியும்?",
+  mr: "नमस्कार, मी तुम्हाला कशी मदत करू शकतो?"
+};
+
 export function BhoomiApp({ language }: BhoomiAppProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -134,20 +142,13 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const t = UI_STRINGS[language.id] || UI_STRINGS.en;
 
-  const greetings: Record<string, string> = {
-    en: "Hi, what can I help you with?",
-    hi: "नमस्ते, मैं आपकी क्या मदद कर सकता हूँ?",
-    bn: "হাই, আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
-    ta: "வணக்கம், நான் உங்களுக்கு எப்படி உதவ முடியும்?",
-    mr: "नमस्कार, मी तुम्हाला कशी मदत करू शकतो?"
-  };
-
+  // Initialize messages and speech recognition once per language change
   useEffect(() => {
     setMessages([
       {
         id: 'welcome',
         role: 'assistant',
-        content: greetings[language.id] || greetings.en,
+        content: GREETINGS[language.id] || GREETINGS.en,
         suggestions: [
           t.diseaseLabel,
           t.marketLabel,
@@ -164,7 +165,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
         
-        // Use proper locale codes for Indian regions
         const localeMap: Record<string, string> = {
           en: 'en-US',
           hi: 'hi-IN',
@@ -190,13 +190,19 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         };
       }
     }
-  }, [language, greetings, t]);
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, [language.id]); // Only re-run when language ID changes
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isProcessing]);
+  }, [messages.length, isProcessing]);
 
   const playAudio = (base64Audio: string) => {
     if (audioRef.current) {
@@ -245,7 +251,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     } finally {
       setIsProcessing(false);
     }
-  }, [language, messages, t, isProcessing]);
+  }, [language.id, messages.length, t.error, isProcessing]);
 
   const toggleRecording = () => {
     if (!recognitionRef.current) {
