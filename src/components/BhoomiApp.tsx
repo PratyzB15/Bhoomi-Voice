@@ -157,7 +157,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       }
     ]);
 
-    // Initialize Speech Recognition
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
@@ -272,6 +271,35 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     await processResponse(action);
   };
 
+  const formatMessageContent = (content: string) => {
+    return content.split('\n').map((line, i) => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return null;
+
+      // Detect subheadings (Uppercase ending with colon)
+      if (trimmedLine.match(/^[A-Z\s]+:$/)) {
+        return (
+          <div key={i} className="font-bold text-primary mt-4 mb-1 uppercase tracking-wider text-xs border-b border-primary/10 pb-1">
+            {trimmedLine}
+          </div>
+        );
+      }
+
+      // Detect bullet points
+      if (trimmedLine.startsWith('•')) {
+        return (
+          <div key={i} className="flex gap-2 ml-1 my-1.5 items-start">
+            <span className="text-primary mt-0.5">•</span>
+            <span className="text-sm leading-relaxed">{trimmedLine.substring(1).trim()}</span>
+          </div>
+        );
+      }
+
+      // Standard paragraph
+      return <p key={i} className="text-sm leading-relaxed my-1">{trimmedLine}</p>;
+    });
+  };
+
   return (
     <div className="mobile-stage flex flex-col bg-white">
       {/* App Header */}
@@ -297,35 +325,24 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
       {/* Quick Access Tiles */}
       <div className="p-4 grid grid-cols-4 gap-2 bg-muted/30">
-        <button onClick={() => handleAction(t.diseaseLabel)} className="flex flex-col items-center gap-1 group">
-          <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-700 group-active:scale-95 transition-transform">
-            <Leaf className="w-5 h-5" />
-          </div>
-          <span className="text-[9px] font-bold text-center">{t.disease}</span>
-        </button>
-        <button onClick={() => handleAction(t.marketLabel)} className="flex flex-col items-center gap-1 group">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 group-active:scale-95 transition-transform">
-            <LineChart className="w-5 h-5" />
-          </div>
-          <span className="text-[9px] font-bold text-center">{t.market}</span>
-        </button>
-        <button onClick={() => handleAction(t.weatherLabel)} className="flex flex-col items-center gap-1 group">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 group-active:scale-95 transition-transform">
-            <CloudSun className="w-5 h-5" />
-          </div>
-          <span className="text-[9px] font-bold text-center">{t.weather}</span>
-        </button>
-        <button onClick={() => handleAction(t.guideLabel)} className="flex flex-col items-center gap-1 group">
-          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-700 group-active:scale-95 transition-transform">
-            <HelpCircle className="w-5 h-5" />
-          </div>
-          <span className="text-[9px] font-bold text-center">{t.guide}</span>
-        </button>
+        {[
+          { icon: Leaf, label: t.disease, action: t.diseaseLabel, color: 'bg-green-100 text-green-700' },
+          { icon: LineChart, label: t.market, action: t.marketLabel, color: 'bg-amber-100 text-amber-700' },
+          { icon: CloudSun, label: t.weather, action: t.weatherLabel, color: 'bg-blue-100 text-blue-700' },
+          { icon: HelpCircle, label: t.guide, action: t.guideLabel, color: 'bg-purple-100 text-purple-700' }
+        ].map((item, idx) => (
+          <button key={idx} onClick={() => handleAction(item.action)} className="flex flex-col items-center gap-1 group">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center group-active:scale-95 transition-transform ${item.color}`}>
+              <item.icon className="w-5 h-5" />
+            </div>
+            <span className="text-[9px] font-bold text-center">{item.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Chat Area */}
       <ScrollArea className="flex-1 p-4 bg-[#F9FBF8]">
-        <div className="space-y-4">
+        <div className="space-y-6">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
@@ -336,21 +353,21 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                 }`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
-                  <img src={msg.imageUrl} alt="Uploaded crop" className="w-full rounded-lg mb-2" />
+                  <img src={msg.imageUrl} alt="Uploaded crop" className="w-full rounded-lg mb-3 shadow-sm" />
                 )}
-                <div className="whitespace-pre-line text-sm leading-relaxed">
-                  {msg.content}
+                <div className="whitespace-pre-line">
+                  {msg.role === 'assistant' ? formatMessageContent(msg.content) : msg.content}
                 </div>
               </div>
               
               {msg.suggestions && msg.suggestions.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2 justify-start">
+                <div className="mt-3 flex flex-wrap gap-2 justify-start">
                   {msg.suggestions.map((suggestion, idx) => (
                     <Button 
                       key={idx} 
                       variant="outline" 
                       size="sm" 
-                      className="text-[10px] h-7 rounded-full bg-white border-primary/20 text-primary hover:bg-primary/5"
+                      className="text-[10px] h-7 rounded-full bg-white border-primary/20 text-primary hover:bg-primary/5 hover:border-primary transition-all"
                       onClick={() => handleAction(suggestion)}
                     >
                       {suggestion}
@@ -362,8 +379,9 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           ))}
           {isProcessing && (
             <div className="flex justify-start">
-              <div className="bg-white border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-sm">
-                <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              <div className="bg-white border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-sm flex items-center gap-2">
+                <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is thinking...</span>
               </div>
             </div>
           )}
@@ -380,10 +398,10 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processResponse(input)}
-              className="pr-10 h-12 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary"
+              className="pr-10 h-12 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary shadow-inner"
             />
             <button 
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               <Paperclip className="w-5 h-5" />
@@ -407,7 +425,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         
         <div className="flex justify-between items-center px-1">
           <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-            <Leaf className="w-3 h-3" /> {t.verified}
+            <Leaf className="w-3 h-3 text-primary/60" /> {t.verified}
           </p>
           <button className="text-[10px] text-primary font-bold hover:underline" onClick={() => handleAction(t.marketLabel)}>
             {t.liveRates}

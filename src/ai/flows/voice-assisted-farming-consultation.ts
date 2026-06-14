@@ -4,7 +4,7 @@
  * It handles speech-to-text input, processes it with an LLM, and provides a text response
  * along with a Text-to-Speech audio output in the user's selected regional language.
  *
- * - voiceAssistedFarmingConsultation - The main function to interact with the farming consultant.
+ * - voiceAssistedFarmingConsultation - The main function to interact with the consultation.
  * - VoiceAssistedFarmingConsultationInput - The input type for the consultation.
  * - VoiceAssistedFarmingConsultationOutput - The return type for the consultation.
  */
@@ -27,10 +27,9 @@ export type VoiceAssistedFarmingConsultationInput = z.infer<typeof VoiceAssisted
 
 // Define the output schema for the LLM prompt (only text and follow-ups)
 const VoiceAssistedFarmingConsultationLLMOutputSchema = z.object({
-  responseText: z.string().describe("The AI's text response to the farmer's query, formatted with bullet points for readability."),
-  followUpQuestions: z.array(z.string()).optional().describe("Suggested follow-up questions for the farmer related to their query."),
+  responseText: z.string().describe("The AI's text response to the farmer's query."),
+  followUpQuestions: z.array(z.string()).optional().describe("Suggested follow-up questions for the farmer."),
 });
-type VoiceAssistedFarmingConsultationLLMOutput = z.infer<typeof VoiceAssistedFarmingConsultationLLMOutputSchema>;
 
 // Define the final output schema for the flow (includes audio)
 const VoiceAssistedFarmingConsultationOutputSchema = z.object({
@@ -69,10 +68,7 @@ async function toWav(
   });
 }
 
-// Map languages to specific prebuilt voices from the allowed list:
-// achernar, achird, algenib, algieba, alnilam, aoede, autonoe, callirrhoe, charon, despina, 
-// enceladus, erinome, fenrir, gacrux, iapetus, kore, laomedeia, leda, orus, puck, 
-// pulcherrima, rasalgethi, sadachbia, sadaltager, schedar, sulafat, umbriel, vindemiatrix, zephyr, zubenelgenubi
+// Map languages to specific prebuilt voices
 const languageToVoiceName: Record<VoiceAssistedFarmingConsultationInput['selectedLanguage'], string> = {
   'en': 'Algenib',    // English
   'hi': 'Achernar',   // Hindi
@@ -86,7 +82,24 @@ const farmingConsultantPrompt = ai.definePrompt({
   name: 'farmingConsultantPrompt',
   input: { schema: VoiceAssistedFarmingConsultationInputSchema },
   output: { schema: VoiceAssistedFarmingConsultationLLMOutputSchema },
-  prompt: `You are an expert natural farming consultant for Indian farmers. Your goal is to provide accurate, practical, and empathetic advice on natural farming.\nAlways respond strictly in the language specified by '{{selectedLanguage}}'.\n\nIf the 'chatHistory' is empty, your first response should be a friendly greeting asking how you can help, such as "Hi, what can I help you with?". Subsequently, if 'chatHistory' is not empty, assume the user is asking a direct question.\n\nBased on the farmer's input, provide detailed, actionable advice.\nOrganize different pieces of information (e.g., month, irrigation, seeds, rates) using bullet points for clarity and easy readability.\n\nAfter providing the main answer, proactively suggest one or two relevant follow-up questions that the farmer might find useful. These follow-up questions should be outputted as a JSON array of strings in the 'followUpQuestions' field.\n\nOutput your response in JSON format, strictly adhering to the following schema:\n{{ai.outputSchema.json}}\n\nCurrent conversation history:\n{{#if chatHistory}}\n  {{#each chatHistory}}\n    {{this.role}}: {{this.content}}\n  {{/each}}\n{{/if}}\n\nUser's query: {{{userInputText}}}`,
+  prompt: `You are an expert natural farming consultant for Indian farmers. 
+Strictly respond in the language: {{selectedLanguage}}.
+
+FORMATTING RULES:
+1. DO NOT use any markdown markers like '*', '#', or '_'.
+2. For subheadings, use UPPERCASE text followed by a colon (e.g., SOIL PREPARATION:).
+3. For bullet points, start the line with the '•' character.
+4. Keep the response EXTREMELY CONCISE (maximum 100 words) to ensure fast delivery. 
+5. Focus only on the most critical information requested.
+
+Current conversation history:
+{{#if chatHistory}}
+  {{#each chatHistory}}
+    {{this.role}}: {{this.content}}
+  {{/each}}
+{{/if}}
+
+User's query: {{{userInputText}}}`,
 });
 
 // Define the Genkit flow
