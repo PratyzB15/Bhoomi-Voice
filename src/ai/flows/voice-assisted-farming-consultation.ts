@@ -30,7 +30,7 @@ const VoiceAssistedFarmingConsultationLLMOutputSchema = z.object({
 // Define the final output schema for the flow
 const VoiceAssistedFarmingConsultationOutputSchema = z.object({
   responseText: z.string().describe("The AI's text response to the farmer's query."),
-  responseAudio: z.string().describe("The AI's audio response in WAV format, base64 encoded as a data URI."),
+  responseAudio: z.string().optional().describe("The AI's audio response in WAV format, base64 encoded as a data URI."),
   followUpQuestions: z.array(z.string()).optional().describe("Suggested follow-up questions for the farmer."),
 });
 export type VoiceAssistedFarmingConsultationOutput = z.infer<typeof VoiceAssistedFarmingConsultationOutputSchema>;
@@ -44,23 +44,25 @@ async function toWav(
   sampleWidth = 2
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const writer = new wav.Writer({
-      channels,
-      sampleRate: rate,
-      bitDepth: sampleWidth * 8,
-    });
+    try {
+      const writer = new wav.Writer({
+        channels,
+        sampleRate: rate,
+        bitDepth: sampleWidth * 8,
+      });
 
-    let bufs = [] as any[];
-    writer.on('error', reject);
-    writer.on('data', function (d) {
-      bufs.push(d);
-    });
-    writer.on('end', function () {
-      resolve(Buffer.concat(bufs).toString('base64'));
-    });
+      let bufs = [] as Buffer[];
+      writer.on('error', reject);
+      writer.on('data', (d) => bufs.push(d));
+      writer.on('end', () => {
+        resolve(Buffer.concat(bufs).toString('base64'));
+      });
 
-    writer.write(pcmData);
-    writer.end();
+      writer.write(pcmData);
+      writer.end();
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
@@ -78,23 +80,21 @@ const farmingConsultantPrompt = ai.definePrompt({
   name: 'farmingConsultantPrompt',
   input: { schema: VoiceAssistedFarmingConsultationInputSchema },
   output: { schema: VoiceAssistedFarmingConsultationLLMOutputSchema },
-  prompt: `You are an expert natural farming consultant specializing in the Indian agricultural context. 
-Your goal is to provide high-quality, comprehensive, and detailed advice to farmers transitioning to or practicing natural farming.
+  prompt: `You are an expert natural farming consultant for the Indian context. 
+Your goal is to provide detailed, comprehensive advice to farmers.
 
 STRICT LANGUAGE RULE:
-You must respond entirely and exclusively in the following language code: {{selectedLanguage}}.
+You must respond entirely and exclusively in the language code: {{selectedLanguage}}.
 
-FORMATTING RULES (CRITICAL):
-1. DO NOT use any markdown markers like asterisks, hashes, underscores, or backticks.
-2. Use ALL-CAPS followed by a colon for subheadings (e.g., SOIL PREPARATION:).
-3. Use the bullet character for bullet points.
+FORMATTING RULES:
+1. NO markdown markers like asterisks or hashes.
+2. Use ALL-CAPS followed by a colon for subheadings.
+3. Use the bullet character (•) for bullet points.
 4. Every bullet point MUST start on its own brand new line.
-5. Do not indent sub-points; keep everything left-aligned.
 
 CONTENT RULES:
-1. Provide a DETAILED, INFORMATIVE, and COMPREHENSIVE response. 
-2. Ensure the farmer gets all the necessary steps, biological reasoning, and practical tips.
-3. If the query is about a specific crop, provide detailed information about soil, irrigation, seeds, and pest control.
+1. Provide a DETAILED and INFORMATIVE response. 
+2. Ensure the farmer gets biological reasoning and practical tips.
 
 Current conversation history:
 {{#if chatHistory}}
@@ -117,42 +117,41 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
     // 1. Generate text response using the LLM
     const { output } = await farmingConsultantPrompt(input);
     if (!output?.responseText) {
-      throw new Error('Failed to get a text response from the farming consultant.');
+      throw new Error('No response text generated.');
     }
 
     const voiceName = languageToVoiceName[input.selectedLanguage] || 'Algenib';
 
-    // 2. Convert the text response to audio using TTS
-    const { media } = await ai.generate({
-      model: googleAI.model('gemini-2.5-flash-preview-tts'),
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: voiceName },
+    // 2. Convert the text response to audio using TTS (with fallback)
+    let audioDataUri: string | undefined;
+    try {
+      const { media } = await ai.generate({
+        model: googleAI.model('gemini-2.5-flash-preview-tts'),
+        config: {
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: voiceName },
+            },
           },
         },
-      },
-      prompt: output.responseText,
-    });
+        prompt: output.responseText,
+      });
 
-    if (!media) {
-      throw new Error('No audio media returned from TTS.');
+      if (media && media.url) {
+        const base64Pcm = media.url.substring(media.url.indexOf(',') + 1);
+        const audioBuffer = Buffer.from(base64Pcm, 'base64');
+        const wavBase64 = await toWav(audioBuffer);
+        audioDataUri = 'data:audio/wav;base64,' + wavBase64;
+      }
+    } catch (audioError) {
+      console.error('TTS synthesis failed, continuing with text only:', audioError);
+      // We don't throw here to ensure the text reaches the user
     }
 
-    // Extract base64 encoded PCM data
-    const audioBuffer = Buffer.from(
-      media.url.substring(media.url.indexOf(',') + 1),
-      'base64'
-    );
-
-    // Convert PCM to WAV
-    const wavBase64 = await toWav(audioBuffer);
-
-    // Return both text and audio
     return {
       responseText: output.responseText,
-      responseAudio: 'data:audio/wav;base64,' + wavBase64,
+      responseAudio: audioDataUri,
       followUpQuestions: output.followUpQuestions,
     };
   }

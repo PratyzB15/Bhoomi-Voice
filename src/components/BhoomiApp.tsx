@@ -210,7 +210,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     }
     const audio = new Audio(base64Audio);
     audioRef.current = audio;
-    audio.play();
+    audio.play().catch(e => console.error("Audio playback blocked or failed:", e));
   };
 
   const addMessage = (msg: Omit<Message, 'id'>) => {
@@ -246,12 +246,12 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         playAudio(result.responseAudio);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Consultation Flow Error:", error);
       addMessage({ role: 'assistant', content: t.error });
     } finally {
       setIsProcessing(false);
     }
-  }, [language.id, messages.length, t.error, isProcessing]);
+  }, [language.id, messages, t.error, isProcessing]);
 
   const toggleRecording = () => {
     if (!recognitionRef.current) {
@@ -290,6 +290,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         
         addMessage({ role: 'assistant', content: result.responseInSelectedLanguage });
       } catch (error) {
+        console.error("Image Analysis Error:", error);
         addMessage({ role: 'assistant', content: t.error });
       } finally {
         setIsProcessing(false);
