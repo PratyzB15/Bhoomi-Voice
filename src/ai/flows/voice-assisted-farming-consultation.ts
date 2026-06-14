@@ -69,13 +69,16 @@ async function toWav(
   });
 }
 
-// Map languages to specific prebuilt voices (best effort, actual availability may vary)
+// Map languages to specific prebuilt voices from the allowed list:
+// achernar, achird, algenib, algieba, alnilam, aoede, autonoe, callirrhoe, charon, despina, 
+// enceladus, erinome, fenrir, gacrux, iapetus, kore, laomedeia, leda, orus, puck, 
+// pulcherrima, rasalgethi, sadachbia, sadaltager, schedar, sulafat, umbriel, vindemiatrix, zephyr, zubenelgenubi
 const languageToVoiceName: Record<VoiceAssistedFarmingConsultationInput['selectedLanguage'], string> = {
-  'en': 'Algenib', // English
-  'hi': 'Achernar', // Hindi
-  'bn': 'Deneb',   // Bengali
-  'ta': 'Fomalhaut', // Tamil
-  'mr': 'Sirius',   // Marathi
+  'en': 'Algenib',    // English
+  'hi': 'Achernar',   // Hindi
+  'bn': 'Aoede',      // Bengali
+  'ta': 'Charon',     // Tamil
+  'mr': 'Zephyr',     // Marathi
 };
 
 // Define the main consultation prompt
@@ -83,7 +86,6 @@ const farmingConsultantPrompt = ai.definePrompt({
   name: 'farmingConsultantPrompt',
   input: { schema: VoiceAssistedFarmingConsultationInputSchema },
   output: { schema: VoiceAssistedFarmingConsultationLLMOutputSchema },
-  // Tools could be added here later for RAG or external data lookups.
   prompt: `You are an expert natural farming consultant for Indian farmers. Your goal is to provide accurate, practical, and empathetic advice on natural farming.\nAlways respond strictly in the language specified by '{{selectedLanguage}}'.\n\nIf the 'chatHistory' is empty, your first response should be a friendly greeting asking how you can help, such as "Hi, what can I help you with?". Subsequently, if 'chatHistory' is not empty, assume the user is asking a direct question.\n\nBased on the farmer's input, provide detailed, actionable advice.\nOrganize different pieces of information (e.g., month, irrigation, seeds, rates) using bullet points for clarity and easy readability.\n\nAfter providing the main answer, proactively suggest one or two relevant follow-up questions that the farmer might find useful. These follow-up questions should be outputted as a JSON array of strings in the 'followUpQuestions' field.\n\nOutput your response in JSON format, strictly adhering to the following schema:\n{{ai.outputSchema.json}}\n\nCurrent conversation history:\n{{#if chatHistory}}\n  {{#each chatHistory}}\n    {{this.role}}: {{this.content}}\n  {{/each}}\n{{/if}}\n\nUser's query: {{{userInputText}}}`,
 });
 
