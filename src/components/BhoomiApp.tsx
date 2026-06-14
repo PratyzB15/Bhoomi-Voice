@@ -196,13 +196,13 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         recognitionRef.current.abort();
       }
     };
-  }, [language.id]); // Only re-run when language ID changes
+  }, [language.id, t.diseaseLabel, t.marketLabel, t.weatherLabel, t.guideLabel]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages.length, isProcessing]);
+  }, [messages, isProcessing]);
 
   const playAudio = (base64Audio: string) => {
     if (audioRef.current) {
@@ -308,6 +308,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       const trimmedLine = line.trim();
       if (!trimmedLine) return <div key={i} className="h-2" />;
 
+      // Subheading Detection: ALL-CAPS followed by colon
       if (trimmedLine.match(/^[A-Z\s]+:$/)) {
         return (
           <div key={i} className="font-bold text-primary mt-6 mb-2 uppercase tracking-widest text-xs border-b border-primary/20 pb-1.5">
@@ -316,6 +317,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         );
       }
 
+      // Bullet Detection: Starting with • or -
       if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
         const text = trimmedLine.startsWith('•') ? trimmedLine.substring(1).trim() : trimmedLine.substring(1).trim();
         return (

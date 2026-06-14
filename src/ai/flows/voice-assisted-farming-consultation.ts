@@ -86,17 +86,13 @@ Your goal is to provide detailed, comprehensive advice to farmers.
 STRICT LANGUAGE RULE:
 You must respond entirely and exclusively in the language code: {{selectedLanguage}}.
 
-FORMATTING RULES:
-1. NO markdown markers like asterisks or hashes.
-2. Use ALL-CAPS followed by a colon for subheadings.
+FORMATTING RULES (CRITICAL):
+1. NO markdown markers like asterisks, hashes, underscores, or backticks.
+2. Use ALL-CAPS followed by a colon for subheadings (e.g., SOIL PREPARATION:).
 3. Use the bullet character (•) for bullet points.
-4. Every bullet point MUST start on its own brand new line.
+4. Every single bullet point MUST start on its own brand new line.
 5. Every subheading MUST start on its own brand new line.
-
-CONTENT RULES:
-1. Provide a DETAILED, DEEP, and INFORMATIVE response.
-2. Cover all aspects of the farmer's query including biological reasoning and practical steps.
-3. Use multiple subheadings to organize information.
+6. Provide a DETAILED, DEEP, and INFORMATIVE response. Cover biological reasoning and practical steps.
 
 Current conversation history:
 {{#if chatHistory}}
@@ -130,7 +126,7 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
         attempts++;
         console.warn(`AI Generation attempt ${attempts} failed:`, e.message);
         if (attempts >= maxAttempts) throw e;
-        // Exponential backoff or simple delay
+        // Exponential backoff
         await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
       }
     }
