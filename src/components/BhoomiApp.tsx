@@ -31,8 +31,7 @@ import {
   BarChart as ReChartsBarChart, 
   XAxis, 
   YAxis, 
-  CartesianGrid, 
-  ResponsiveContainer 
+  CartesianGrid 
 } from 'recharts';
 import {
   Table,
@@ -86,7 +85,7 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "Price (₹/Qtl)",
     seasonHeader: "Season",
     bestCrops: "Best Crops",
-    trendLabel: "Market Trend (Bar Chart)"
+    trendLabel: "Market Trend"
   },
   hi: { 
     appName: "भूमि वॉइस", 
@@ -111,7 +110,7 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "भाव (₹/क्विंटल)",
     seasonHeader: "सीजन",
     bestCrops: "बेहतरीन फसलें",
-    trendLabel: "बाजार का रुझान (बार चार्ट)"
+    trendLabel: "बाजार का रुझान"
   },
   bn: { 
     appName: "ভূমি ভয়েস", 
@@ -136,7 +135,7 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "দাম (টাকা/কুইন্টাল)",
     seasonHeader: "ঋতু",
     bestCrops: "সেরা ফসল",
-    trendLabel: "বাজারের প্রবণতা (বার চার্ট)"
+    trendLabel: "বাজারের প্রবণতা"
   },
   ta: { 
     appName: "பூமி வாய்ஸ்", 
@@ -161,7 +160,7 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "விலை (₹/குவிண்டால்)",
     seasonHeader: "பருவம்",
     bestCrops: "சிறந்த பயிர்கள்",
-    trendLabel: "சந்தை போக்கு (பார் சார்ட்)"
+    trendLabel: "சந்தை போக்கு"
   },
   mr: { 
     appName: "भूमी व्हॉइस", 
@@ -179,14 +178,14 @@ const UI_STRINGS: Record<string, any> = {
     weatherLabel: "हवामान अंदाज",
     guideLabel: "मदत मार्गदर्शक",
     diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा किंवा समस्येचे वर्णन करा. मी कीड आणि कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
-    marketPrompt: "तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचा आहे? प्रमुख भारतीय पिकांचे सध्याचे दर आणि कल येथे दिले आहेत.",
+    marketPrompt: "तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचे आहे? प्रमुख भारतीय पिकांचे सध्याचे दर और कल येथे दिले आहेत.",
     weatherPrompt: "चांगल्या कापणीसाठी हवामान अत्यंत महत्त्वाचे आहे. प्रत्येक हंगामात कोणती पिके उत्तम येतात याची माहिती येथे आहे. तुम्हाला आजचे हवामान पेरणीसाठी योग्य आहे का हे जाणून घ्यायचे आहे का, की तुमच्या मनात एखादे विशिष्ट पीक आहे?",
     guidePrompt: "भूमी व्हॉइस आपला वैयक्तिक शेती सहाय्यक आहे. आपण माइक बटणावर क्लिक करून माझ्याशी बोलू शकता किंवा आपले प्रश्न टाइप करू शकता. पिकांच्या रोगाचे त्वरित निदान करण्यासाठी पेपरक्लिप वापरून फोटो अपलोड करा. बाजार आणि हवामानाच्या अपडेट्ससाठी वरील बटणे वापरा. मी माझी सर्व उत्तरे तुम्हाला बोलून दाखवेन!",
     cropHeader: "पीक",
     priceHeader: "दर (₹/क्विंटल)",
     seasonHeader: "हवामान",
     bestCrops: "सर्वोत्तम पिके",
-    trendLabel: "बाजार कल (बार चार्ट)"
+    trendLabel: "बाजार कल"
   }
 };
 
@@ -198,27 +197,67 @@ const GREETINGS: Record<string, string> = {
   mr: "नमस्कार, मी भूमी आहे. आज मी तुम्हाला कशी मदत करू शकतो?"
 };
 
-const MARKET_DATA = [
-  { name: 'Rice', price: 2180, trend: 1.2 },
-  { name: 'Wheat', price: 2275, trend: 0.8 },
-  { name: 'Cotton', price: 6800, trend: -0.5 },
-  { name: 'Maize', price: 1950, trend: 1.5 },
-  { name: 'Mustard', price: 5450, trend: 0.2 },
-];
+const getLocalizedMarketData = (lang: string) => {
+  const data: Record<string, any[]> = {
+    en: [
+      { name: 'Rice', price: 2180 }, { name: 'Wheat', price: 2275 },
+      { name: 'Cotton', price: 6800 }, { name: 'Maize', price: 1950 },
+      { name: 'Mustard', price: 5450 }
+    ],
+    hi: [
+      { name: 'चावल', price: 2180 }, { name: 'गेहूं', price: 2275 },
+      { name: 'कपास', price: 6800 }, { name: 'मक्का', price: 1950 },
+      { name: 'सरसों', price: 5450 }
+    ],
+    bn: [
+      { name: 'চাল', price: 2180 }, { name: 'গম', price: 2275 },
+      { name: 'তুলা', price: 6800 }, { name: 'ভুট্টা', price: 1950 },
+      { name: 'সরিষা', price: 5450 }
+    ],
+    ta: [
+      { name: 'அரிசி', price: 2180 }, { name: 'கோதுமை', price: 2275 },
+      { name: 'பருத்தி', price: 6800 }, { name: 'சோளம்', price: 1950 },
+      { name: 'கடுகு', price: 5450 }
+    ],
+    mr: [
+      { name: 'तांदूळ', price: 2180 }, { name: 'गहू', price: 2275 },
+      { name: 'कापूस', price: 6800 }, { name: 'मका', price: 1950 },
+      { name: 'मोहरी', price: 5450 }
+    ]
+  };
+  return data[lang] || data.en;
+};
 
-const SEASON_DATA = [
-  { season: 'Kharif (Jun-Oct)', crops: 'Rice, Maize, Cotton, Soybean' },
-  { season: 'Rabi (Nov-Mar)', crops: 'Wheat, Mustard, Barley, Peas' },
-  { season: 'Zaid (Mar-Jun)', crops: 'Watermelon, Cucumber, Moong' },
-];
-
-const MARKET_CHART_DATA = [
-  { name: 'Rice', price: 2180 },
-  { name: 'Wheat', price: 2275 },
-  { name: 'Cotton', price: 6800 },
-  { name: 'Maize', price: 1950 },
-  { name: 'Mustard', price: 5450 },
-];
+const getLocalizedSeasonData = (lang: string) => {
+  const data: Record<string, any[]> = {
+    en: [
+      { season: 'Kharif (Jun-Oct)', crops: 'Rice, Maize, Cotton' },
+      { season: 'Rabi (Nov-Mar)', crops: 'Wheat, Mustard, Peas' },
+      { season: 'Zaid (Mar-Jun)', crops: 'Watermelon, Moong' }
+    ],
+    hi: [
+      { season: 'खरीफ (जून-अक्टूबर)', crops: 'चावल, मक्का, कपास' },
+      { season: 'रबी (नवंबर-मार्च)', crops: 'गेहूं, सरसों, मटर' },
+      { season: 'जायद (मार्च-जून)', crops: 'तरबूज, मूंग' }
+    ],
+    bn: [
+      { season: 'খরিফ (জুন-অক্টোবর)', crops: 'চাল, ভুট্টা, তুলা' },
+      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষা, মটর' },
+      { season: 'জায়েদ (মার্চ-জুন)', crops: 'তরমুজ, মুগ' }
+    ],
+    ta: [
+      { season: 'காரிஃப் (ஜூன்-அக்டோபர்)', crops: 'அரிசி, சோளம், பருத்தி' },
+      { season: 'ரபி (நவம்பர்-மார்ச்)', crops: 'கோதுமை, கடுகு, பட்டாணி' },
+      { season: 'சையத் (மார்ச்-ஜூன்)', crops: 'தர்பூசணி, பாசிப்பயறு' }
+    ],
+    mr: [
+      { season: 'खरीप (जून-ऑक्टोबर)', crops: 'तांदूळ, मका, कापूस' },
+      { season: 'रब्बी (नोव्हेंबर-मार्च)', crops: 'गहू, मोहरी, मटार' },
+      { season: 'जायद (मार्च-जून)', crops: 'कलिंगड, मूग' }
+    ]
+  };
+  return data[lang] || data.en;
+};
 
 const chartConfig = {
   price: { label: "Price", color: "hsl(var(--primary))" },
@@ -312,7 +351,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       const result = await voiceAssistedFarmingConsultation({
         userInputText: text,
         selectedLanguage: language.id as any,
-        chatHistory: messages.map(m => ({ 
+        chatHistory: messages.slice(-4).map(m => ({ 
           role: m.role === 'assistant' ? 'model' : 'user', 
           content: m.content 
         }))
@@ -427,65 +466,69 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         );
       }
 
-      return <p key={i} className="text-sm leading-relaxed my-2 text-foreground/90">{trimmedLine}</p>;
+      return <p key={i} className="text-sm leading-relaxed my-2 text-foreground/90 break-words">{trimmedLine}</p>;
     });
   };
 
   const renderSpecialContent = (msg: Message) => {
     if (msg.type === 'market_data') {
+      const marketData = getLocalizedMarketData(language.id);
       return (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           <div className="bg-white rounded-xl border border-primary/10 overflow-hidden shadow-sm">
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow>
-                  <TableHead className="text-xs font-bold text-primary">{t.cropHeader}</TableHead>
-                  <TableHead className="text-xs font-bold text-primary text-right">{t.priceHeader}</TableHead>
+                  <TableHead className="text-xs font-bold text-primary px-3">{t.cropHeader}</TableHead>
+                  <TableHead className="text-xs font-bold text-primary text-right px-3">{t.priceHeader}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {MARKET_DATA.map((crop) => (
+                {marketData.map((crop) => (
                   <TableRow key={crop.name} className="hover:bg-transparent">
-                    <TableCell className="text-xs py-2">{crop.name}</TableCell>
-                    <TableCell className="text-xs py-2 text-right font-medium">₹{crop.price}</TableCell>
+                    <TableCell className="text-xs py-2 px-3">{crop.name}</TableCell>
+                    <TableCell className="text-xs py-2 px-3 text-right font-medium">₹{crop.price}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
           
-          <div className="bg-white p-3 rounded-xl border border-primary/10 shadow-sm h-48">
+          <div className="bg-white p-3 rounded-xl border border-primary/10 shadow-sm h-48 w-full overflow-hidden">
             <h4 className="text-[10px] font-bold text-primary/60 uppercase mb-2">{t.trendLabel}</h4>
-            <ChartContainer config={chartConfig} className="h-32 w-full">
-              <ReChartsBarChart data={MARKET_CHART_DATA}>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
-                <YAxis hide domain={[0, 8000]} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="price" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={20} />
-              </ReChartsBarChart>
-            </ChartContainer>
+            <div className="h-32 w-full">
+              <ChartContainer config={chartConfig} className="h-full w-full">
+                <ReChartsBarChart data={marketData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="name" fontSize={9} axisLine={false} tickLine={false} />
+                  <YAxis fontSize={9} axisLine={false} tickLine={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="price" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={16} />
+                </ReChartsBarChart>
+              </ChartContainer>
+            </div>
           </div>
         </div>
       );
     }
 
     if (msg.type === 'weather_data') {
+      const seasonData = getLocalizedSeasonData(language.id);
       return (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           <div className="bg-white rounded-xl border border-primary/10 overflow-hidden shadow-sm">
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow>
-                  <TableHead className="text-xs font-bold text-primary">{t.seasonHeader}</TableHead>
-                  <TableHead className="text-xs font-bold text-primary">{t.bestCrops}</TableHead>
+                  <TableHead className="text-[10px] font-bold text-primary px-2">{t.seasonHeader}</TableHead>
+                  <TableHead className="text-[10px] font-bold text-primary px-2">{t.bestCrops}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {SEASON_DATA.map((row) => (
+                {seasonData.map((row) => (
                   <TableRow key={row.season} className="hover:bg-transparent">
-                    <TableCell className="text-xs py-2 font-medium">{row.season}</TableCell>
-                    <TableCell className="text-xs py-2 text-muted-foreground">{row.crops}</TableCell>
+                    <TableCell className="text-[10px] py-2 px-2 font-medium">{row.season}</TableCell>
+                    <TableCell className="text-[10px] py-2 px-2 text-muted-foreground">{row.crops}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -497,7 +540,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
     if (msg.type === 'guide_data') {
       return (
-        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 space-y-3">
+        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 space-y-3 w-full">
           <div className="flex items-center gap-2 text-primary">
             <HelpCircle className="w-5 h-5" />
             <span className="font-bold text-sm">How to use Bhoomi</span>
@@ -516,7 +559,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   return (
     <div className="mobile-stage flex flex-col bg-white">
-      <div className="p-4 flex items-center justify-between border-b bg-primary text-white z-10">
+      <div className="p-4 flex items-center justify-between border-b bg-primary text-white z-10 shrink-0">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => window.location.reload()}>
             <ChevronLeft className="w-6 h-6" />
@@ -536,7 +579,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-4 gap-2 bg-muted/30">
+      <div className="p-4 grid grid-cols-4 gap-2 bg-muted/30 shrink-0">
         {[
           { icon: Leaf, label: t.disease, action: t.diseaseLabel, color: 'bg-green-100 text-green-700' },
           { icon: BarChart3, label: t.market, action: t.marketLabel, color: 'bg-amber-100 text-amber-700' },
@@ -552,36 +595,36 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         ))}
       </div>
 
-      <ScrollArea className="flex-1 p-4 bg-[#F9FBF8]">
-        <div className="space-y-6">
+      <ScrollArea className="flex-1 p-4 bg-[#F9FBF8] w-full">
+        <div className="space-y-6 pb-4">
           {messages.map((msg) => (
-            <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+            <div key={msg.id} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
-                className={`max-w-[85%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 ${
+                className={`max-w-[85%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 break-words ${
                   msg.role === 'user' 
-                  ? 'bg-primary text-white rounded-tr-none' 
-                  : 'bg-white text-foreground rounded-tl-none border border-primary/10'
-                } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full' : ''}`}
+                  ? 'bg-primary text-white rounded-tr-none ml-auto' 
+                  : 'bg-white text-foreground rounded-tl-none border border-primary/10 mr-auto'
+                } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full max-w-[95%]' : ''}`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
-                  <img src={msg.imageUrl} alt="Uploaded crop" className="w-full rounded-lg mb-3 shadow-sm" />
+                  <img src={msg.imageUrl} alt="Uploaded crop" className="w-full rounded-lg mb-3 shadow-sm object-cover" />
                 )}
                 
                 {renderSpecialContent(msg)}
 
-                <div className="whitespace-pre-line">
+                <div className="whitespace-pre-line w-full">
                   {msg.role === 'assistant' ? formatMessageContent(msg.content) : msg.content}
                 </div>
               </div>
               
               {msg.suggestions && msg.suggestions.length > 0 && !isProcessing && (
-                <div className="mt-3 flex flex-wrap gap-2 justify-start">
+                <div className="mt-3 flex flex-wrap gap-2 justify-start max-w-[95%]">
                   {msg.suggestions.map((suggestion, idx) => (
                     <Button 
                       key={idx} 
                       variant="outline" 
                       size="sm" 
-                      className="text-[10px] h-7 rounded-full bg-white border-primary/20 text-primary hover:bg-primary/5 hover:border-primary transition-all"
+                      className="text-[10px] h-7 rounded-full bg-white border-primary/20 text-primary hover:bg-primary/5 hover:border-primary transition-all whitespace-normal text-left"
                       onClick={() => handleAction(suggestion)}
                     >
                       {suggestion}
@@ -603,7 +646,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </ScrollArea>
 
-      <div className="p-4 bg-white border-t space-y-3">
+      <div className="p-4 bg-white border-t space-y-3 shrink-0">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Input 
@@ -611,7 +654,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processResponse(input)}
-              className="pr-10 h-12 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary shadow-inner"
+              className="pr-10 h-12 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary shadow-inner text-sm"
               disabled={isProcessing}
             />
             <button 
