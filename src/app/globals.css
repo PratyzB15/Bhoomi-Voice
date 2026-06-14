@@ -40,22 +40,32 @@
 }
 
 @keyframes sway {
-  0%, 100% { transform: rotate(-2deg) translateY(0); }
-  50% { transform: rotate(2deg) translateY(-5px); }
+  0%, 100% { transform: rotate(-3deg) translateY(0); }
+  50% { transform: rotate(3deg) translateY(-8px); }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-15px) translateX(10px); }
+}
+
+@keyframes drift {
+  from { transform: translateX(-10%) translateY(0); }
+  to { transform: translateX(10%) translateY(-20px); }
 }
 
 .animate-sway {
-  animation: sway 6s ease-in-out infinite;
+  animation: sway 8s ease-in-out infinite;
   transform-origin: bottom center;
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+.animate-float-nature {
+  animation: float-slow 12s ease-in-out infinite;
+}
+
+.nature-bg {
+  background: radial-gradient(circle at top right, rgba(46, 91, 61, 0.05) 0%, transparent 70%),
+              radial-gradient(circle at bottom left, rgba(212, 160, 23, 0.05) 0%, transparent 70%);
 }
 
 .glass-morphism {

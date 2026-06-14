@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -130,7 +129,7 @@ const UI_STRINGS: Record<string, any> = {
     diseasePrompt: "আপনি কোন উদ্ভিদ বা ফসলের রোগ সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয়, তবে দয়া করে পেপারক্লিপ আইকন ব্যবহার করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন। আমি আপনাকে পোকামাকড় থেকে ফসল রক্ষা করতেও সাহায্য করতে পারি।",
     marketPrompt: "আপনি কোন ফসলের বাজার দর জানতে চান? এখানে প্রধান ভারতীয় ফসলের বর্তমান হার এবং প্রবণতা দেওয়া হলো।",
     weatherPrompt: "ভালো ফসলের জন্য আবহাওয়া অত্যন্ত গুরুত্বপূর্ণ। প্রতিটি ঋতুতে কোন ফসল সবচেয়ে ভালো জন্মায় তার একটি নির্দেশিকা এখানে দেওয়া হলো। আপনি কি জানতে চান আজকের আবহাওয়া চাষের জন্য উপযুক্ত কি না, নাকি আপনার মনে অন্য কোনো নির্দিষ্ট ফসল আছে?",
-    guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে কথা বলতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাওয়ার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
+    guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে কথা বলতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাবহার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
     cropHeader: "ফসল",
     priceHeader: "দাম (টাকা/কুইন্টাল)",
     seasonHeader: "ঋতু",
@@ -242,7 +241,7 @@ const getLocalizedSeasonData = (lang: string) => {
     ],
     bn: [
       { season: 'খরিফ (জুন-অক্টোবর)', crops: 'চাল, ভুট্টা, তুলা' },
-      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষা, মটর' },
+      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষा, মটর' },
       { season: 'জায়েদ (মার্চ-জুন)', crops: 'তরমুজ, মুগ' }
     ],
     ta: [
@@ -378,26 +377,30 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (action === t.diseaseLabel) {
       await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.diseasePrompt}`, true);
     } else if (action === t.marketLabel) {
+      const marketData = getLocalizedMarketData(language.id);
+      const dataSummary = marketData.map(d => `${d.name} is ₹${d.price}`).join(", ");
       addMessage({
         role: 'assistant',
         content: "",
         type: 'market_data'
       });
-      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.marketPrompt}`, true);
+      await processResponse(`Identify yourself as Bhoomi. Summarize these market rates for the user in their language: ${dataSummary}. Then ask which specific crop rate they want to know.`, true);
     } else if (action === t.weatherLabel) {
+      const seasonData = getLocalizedSeasonData(language.id);
+      const dataSummary = seasonData.map(d => `In ${d.season}, the best crops are ${d.crops}`).join(". ");
       addMessage({
         role: 'assistant',
         content: "",
         type: 'weather_data'
       });
-      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.weatherPrompt}`, true);
+      await processResponse(`Identify yourself as Bhoomi. Read out this seasonal crop guide in their language: ${dataSummary}. Then ask if they want to know if today is good for planting.`, true);
     } else if (action === t.guideLabel) {
       addMessage({
         role: 'assistant',
         content: "",
         type: 'guide_data'
       });
-      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.guidePrompt}`, true);
+      await processResponse(`Identify yourself as Bhoomi. Explain how I work in their language based on this: ${t.guidePrompt}`, true);
     } else {
       await processResponse(action);
     }
@@ -475,7 +478,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       const marketData = getLocalizedMarketData(language.id);
       return (
         <div className="space-y-4 w-full">
-          <div className="bg-white rounded-xl border border-primary/10 overflow-hidden shadow-sm">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-primary/10 overflow-hidden shadow-sm">
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow>
@@ -494,7 +497,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             </Table>
           </div>
           
-          <div className="bg-white p-3 rounded-xl border border-primary/10 shadow-sm h-48 w-full overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-sm p-3 rounded-xl border border-primary/10 shadow-sm h-48 w-full overflow-hidden">
             <h4 className="text-[10px] font-bold text-primary/60 uppercase mb-2">{t.trendLabel}</h4>
             <div className="h-32 w-full">
               <ChartContainer config={chartConfig} className="h-full w-full">
@@ -516,7 +519,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       const seasonData = getLocalizedSeasonData(language.id);
       return (
         <div className="space-y-4 w-full">
-          <div className="bg-white rounded-xl border border-primary/10 overflow-hidden shadow-sm">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-primary/10 overflow-hidden shadow-sm">
             <Table>
               <TableHeader className="bg-primary/5">
                 <TableRow>
@@ -540,7 +543,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
     if (msg.type === 'guide_data') {
       return (
-        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 space-y-3 w-full">
+        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 space-y-3 w-full backdrop-blur-sm">
           <div className="flex items-center gap-2 text-primary">
             <HelpCircle className="w-5 h-5" />
             <span className="font-bold text-sm">How to use Bhoomi</span>
@@ -558,8 +561,21 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   };
 
   return (
-    <div className="mobile-stage flex flex-col bg-white">
-      <div className="p-4 flex items-center justify-between border-b bg-primary text-white z-10 shrink-0">
+    <div className="mobile-stage flex flex-col bg-white nature-bg">
+      {/* Decorative nature background elements */}
+      <div className="absolute inset-0 pointer-events-none opacity-10">
+        <div className="absolute -top-10 -left-10 w-40 h-40 animate-sway text-primary/20">
+          <Leaf className="w-full h-full" />
+        </div>
+        <div className="absolute top-1/2 -right-10 w-32 h-32 animate-float-nature text-accent/20">
+          <CloudSun className="w-full h-full" />
+        </div>
+        <div className="absolute bottom-1/4 -left-5 w-24 h-24 animate-sway text-primary/10" style={{ animationDelay: '2s' }}>
+          <Leaf className="w-full h-full" />
+        </div>
+      </div>
+
+      <div className="p-4 flex items-center justify-between border-b bg-primary text-white z-20 shrink-0">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => window.location.reload()}>
             <ChevronLeft className="w-6 h-6" />
@@ -579,7 +595,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-4 gap-2 bg-muted/30 shrink-0">
+      <div className="p-4 grid grid-cols-4 gap-2 bg-white/40 backdrop-blur-sm shrink-0 z-10">
         {[
           { icon: Leaf, label: t.disease, action: t.diseaseLabel, color: 'bg-green-100 text-green-700' },
           { icon: BarChart3, label: t.market, action: t.marketLabel, color: 'bg-amber-100 text-amber-700' },
@@ -595,15 +611,15 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         ))}
       </div>
 
-      <ScrollArea className="flex-1 p-4 bg-[#F9FBF8] w-full">
-        <div className="space-y-6 pb-4">
+      <ScrollArea className="flex-1 p-4 bg-transparent w-full z-10">
+        <div className="space-y-6 pb-4 w-full max-w-full">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
-                className={`max-w-[85%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 break-words ${
+                className={`max-w-[90%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 break-words ${
                   msg.role === 'user' 
                   ? 'bg-primary text-white rounded-tr-none ml-auto' 
-                  : 'bg-white text-foreground rounded-tl-none border border-primary/10 mr-auto'
+                  : 'bg-white/90 backdrop-blur-md text-foreground rounded-tl-none border border-primary/10 mr-auto'
                 } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full max-w-[95%]' : ''}`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
@@ -612,7 +628,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                 
                 {renderSpecialContent(msg)}
 
-                <div className="whitespace-pre-line w-full">
+                <div className="whitespace-pre-line w-full text-sm leading-relaxed overflow-hidden">
                   {msg.role === 'assistant' ? formatMessageContent(msg.content) : msg.content}
                 </div>
               </div>
@@ -624,7 +640,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                       key={idx} 
                       variant="outline" 
                       size="sm" 
-                      className="text-[10px] h-7 rounded-full bg-white border-primary/20 text-primary hover:bg-primary/5 hover:border-primary transition-all whitespace-normal text-left"
+                      className="text-[10px] h-7 rounded-full bg-white/80 backdrop-blur-sm border-primary/20 text-primary hover:bg-primary/5 hover:border-primary transition-all whitespace-normal text-left px-3"
                       onClick={() => handleAction(suggestion)}
                     >
                       {suggestion}
@@ -636,7 +652,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           ))}
           {isProcessing && (
             <div className="flex justify-start">
-              <div className="bg-white border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-sm flex items-center gap-2">
+              <div className="bg-white/90 backdrop-blur-md border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-sm flex items-center gap-2">
                 <Loader2 className="w-4 h-4 text-primary animate-spin" />
                 <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is thinking...</span>
               </div>
@@ -646,7 +662,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </ScrollArea>
 
-      <div className="p-4 bg-white border-t space-y-3 shrink-0">
+      <div className="p-4 bg-white/60 backdrop-blur-md border-t space-y-3 shrink-0 z-20">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Input 
@@ -654,7 +670,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processResponse(input)}
-              className="pr-10 h-12 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary shadow-inner text-sm"
+              className="pr-10 h-12 rounded-2xl bg-white/80 border-none focus-visible:ring-primary shadow-inner text-sm"
               disabled={isProcessing}
             />
             <button 
