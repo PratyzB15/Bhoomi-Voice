@@ -274,12 +274,13 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   const formatMessageContent = (content: string) => {
     return content.split('\n').map((line, i) => {
       const trimmedLine = line.trim();
-      if (!trimmedLine) return null;
+      if (!trimmedLine) return <div key={i} className="h-2" />;
 
       // Detect subheadings (Uppercase ending with colon)
+      // matches things like "SOIL PREPARATION:"
       if (trimmedLine.match(/^[A-Z\s]+:$/)) {
         return (
-          <div key={i} className="font-bold text-primary mt-4 mb-1 uppercase tracking-wider text-xs border-b border-primary/10 pb-1">
+          <div key={i} className="font-bold text-primary mt-6 mb-2 uppercase tracking-widest text-xs border-b border-primary/20 pb-1.5">
             {trimmedLine}
           </div>
         );
@@ -288,15 +289,15 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       // Detect bullet points
       if (trimmedLine.startsWith('•')) {
         return (
-          <div key={i} className="flex gap-2 ml-1 my-1.5 items-start">
-            <span className="text-primary mt-0.5">•</span>
-            <span className="text-sm leading-relaxed">{trimmedLine.substring(1).trim()}</span>
+          <div key={i} className="flex gap-3 ml-1 my-2.5 items-start">
+            <span className="text-primary mt-1 text-base">•</span>
+            <span className="text-sm leading-relaxed text-foreground font-medium">{trimmedLine.substring(1).trim()}</span>
           </div>
         );
       }
 
       // Standard paragraph
-      return <p key={i} className="text-sm leading-relaxed my-1">{trimmedLine}</p>;
+      return <p key={i} className="text-sm leading-relaxed my-2 text-foreground/90">{trimmedLine}</p>;
     });
   };
 
@@ -381,7 +382,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             <div className="flex justify-start">
               <div className="bg-white border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-sm flex items-center gap-2">
                 <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is thinking...</span>
+                <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is fetching detailed advice...</span>
               </div>
             </div>
           )}

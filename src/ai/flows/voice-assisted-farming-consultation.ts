@@ -17,7 +17,7 @@ import wav from 'wav'; // For converting PCM audio to WAV
 // Define input schema for the flow and prompt
 const VoiceAssistedFarmingConsultationInputSchema = z.object({
   userInputText: z.string().describe("The farmer's transcribed voice input."),
-  selectedLanguage: z.enum(['en', 'hi', 'bn', 'ta', 'mr']).describe("The user's selected language ('en' for English, 'hi' for Hindi, 'bn' for Bengali, 'ta' for Tamil, 'mr' for Marathi)."),
+  selectedLanguage: z.enum(['en', 'hi', 'bn', 'ta', 'mr']).describe("The user's selected language code."),
   chatHistory: z.array(z.object({
     role: z.enum(['user', 'model']),
     content: z.string(),
@@ -69,12 +69,12 @@ async function toWav(
 }
 
 // Map languages to specific prebuilt voices
-const languageToVoiceName: Record<VoiceAssistedFarmingConsultationInput['selectedLanguage'], string> = {
-  'en': 'Algenib',    // English
-  'hi': 'Achernar',   // Hindi
-  'bn': 'Aoede',      // Bengali
-  'ta': 'Charon',     // Tamil
-  'mr': 'Zephyr',     // Marathi
+const languageToVoiceName: Record<string, string> = {
+  'en': 'Algenib',
+  'hi': 'Achernar',
+  'bn': 'Aoede',
+  'ta': 'Charon',
+  'mr': 'Zephyr',
 };
 
 // Define the main consultation prompt
@@ -82,15 +82,23 @@ const farmingConsultantPrompt = ai.definePrompt({
   name: 'farmingConsultantPrompt',
   input: { schema: VoiceAssistedFarmingConsultationInputSchema },
   output: { schema: VoiceAssistedFarmingConsultationLLMOutputSchema },
-  prompt: `You are an expert natural farming consultant for Indian farmers. 
-Strictly respond in the language: {{selectedLanguage}}.
+  prompt: `You are an expert natural farming consultant specializing in the Indian agricultural context. 
+Your goal is to provide high-quality, comprehensive, and detailed advice to farmers transitioning to or practicing natural farming.
 
-FORMATTING RULES:
-1. DO NOT use any markdown markers like '*', '#', or '_'.
-2. For subheadings, use UPPERCASE text followed by a colon (e.g., SOIL PREPARATION:).
-3. For bullet points, start the line with the '•' character.
-4. Keep the response EXTREMELY CONCISE (maximum 100 words) to ensure fast delivery. 
-5. Focus only on the most critical information requested.
+STRICT LANGUAGE RULE:
+You must respond entirely and exclusively in the following language: {{selectedLanguage}} ({{#if (eq selectedLanguage "en")}}English{{/if}}{{#if (eq selectedLanguage "hi")}}Hindi{{/if}}{{#if (eq selectedLanguage "bn")}}Bengali{{/if}}{{#if (eq selectedLanguage "ta")}}Tamil{{/if}}{{#if (eq selectedLanguage "mr")}}Marathi{{/if}}).
+
+FORMATTING RULES (CRITICAL):
+1. DO NOT use any markdown markers like '*', '#', '_', or '\`'.
+2. Use ALL-CAPS followed by a colon for subheadings (e.g., SOIL PREPARATION:).
+3. Use the '•' character for bullet points.
+4. Every bullet point MUST start on its own brand new line.
+5. Do not indent sub-points; keep everything left-aligned.
+
+CONTENT RULES:
+1. Provide a DETAILED, INFORMATIVE, and COMPREHENSIVE response. Do not shorten or over-simplify the technical farming advice. 
+2. Ensure the farmer gets all the necessary steps, biological reasoning, and practical tips.
+3. If the query is about a specific crop, provide detailed information about soil, irrigation, seeds, and pest control.
 
 Current conversation history:
 {{#if chatHistory}}
@@ -116,7 +124,7 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
       throw new Error('Failed to get a text response from the farming consultant.');
     }
 
-    const voiceName = languageToVoiceName[input.selectedLanguage];
+    const voiceName = languageToVoiceName[input.selectedLanguage] || 'Algenib';
 
     // 2. Convert the text response to audio using TTS
     const { media } = await ai.generate({
