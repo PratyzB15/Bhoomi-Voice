@@ -10,7 +10,7 @@ import {
   Send, 
   Leaf, 
   CloudSun, 
-  LineChart, 
+  BarChart3, 
   HelpCircle,
   MoreVertical,
   Paperclip,
@@ -27,8 +27,8 @@ import {
   ChartTooltipContent 
 } from '@/components/ui/chart';
 import { 
-  Line, 
-  LineChart as ReChartsLineChart, 
+  Bar, 
+  BarChart as ReChartsBarChart, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -47,7 +47,7 @@ type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  type?: 'text' | 'image' | 'audio' | 'market_data' | 'weather_data';
+  type?: 'text' | 'image' | 'audio' | 'market_data' | 'weather_data' | 'guide_data';
   imageUrl?: string;
   suggestions?: string[];
   data?: any;
@@ -78,14 +78,15 @@ const UI_STRINGS: Record<string, any> = {
     marketLabel: "Market Prices",
     weatherLabel: "Weather Forecast",
     guideLabel: "Help Guide",
-    diseasePrompt: "What plant/crop disease do you want to know about? If your crop is facing any diseases please upload a pic or describe the problem so that I can help. You can also ask how to protect from insects and pests.",
-    marketPrompt: "Which crop market price do you want to know?",
-    weatherPrompt: "Weather is vital for a good harvest. Do you want to know which crop is best for today's weather, or which crop you want to plant? I will suggest the best weather and timing.",
+    diseasePrompt: "What plant or crop disease do you want to know about? If your crop is facing any diseases, please upload a picture using the paperclip icon or describe the problem. I can also help you protect your harvest from insects and pests.",
+    marketPrompt: "Which crop market price do you want to know? Here are the current rates and trends for major Indian crops.",
+    weatherPrompt: "Weather is vital for a good harvest. Here is a guide on which crops grow best in each season. Would you like to know if today's weather is suitable for planting, or do you have a specific crop in mind?",
+    guidePrompt: "Bhoomi Voice is your personal farming assistant. You can speak to me by clicking the Mic button, or type your questions below. Click the Paperclip to upload photos of sick crops for instant diagnosis. Use the buttons above for quick Market and Weather updates. I will speak all my answers back to you!",
     cropHeader: "Crop",
     priceHeader: "Price (₹/Qtl)",
     seasonHeader: "Season",
     bestCrops: "Best Crops",
-    trendLabel: "Market Trend"
+    trendLabel: "Market Trend (Bar Chart)"
   },
   hi: { 
     appName: "भूमि वॉइस", 
@@ -102,14 +103,15 @@ const UI_STRINGS: Record<string, any> = {
     marketLabel: "बाजार भाव",
     weatherLabel: "मौसम का पूर्वानुमान",
     guideLabel: "सहायता मार्गदर्शिका",
-    diseasePrompt: "आप किस पौधे/फसल के रोग के बारे में जानना चाहते हैं? यदि आपकी फसल किसी बीमारी का सामना कर रही है तो कृपया एक फोटो अपलोड करें या समस्या का वर्णन करें ताकि मैं मदद कर सकूं। आप कीटों से बचाव के बारे में भी पूछ सकते हैं।",
-    marketPrompt: "आप किस फसल का बाजार भाव जानना चाहते हैं?",
-    weatherPrompt: "अच्छी फसल के लिए मौसम बहुत महत्वपूर्ण है। क्या आप जानना चाहते हैं कि आज के मौसम के लिए कौन सी फसल सबसे अच्छी है, या आप कौन सी फसल लगाना चाहते हैं? मैं सर्वोत्तम मौसम और समय का सुझाव दूंगा।",
+    diseasePrompt: "आप किस पौधे या फसल के रोग के बारे में जानना चाहते हैं? यदि आपकी फसल किसी बीमारी का सामना कर रही है, तो कृपया पेपरक्लिप आइकन का उपयोग करके एक फोटो अपलोड करें या समस्या का वर्णन करें। मैं कीटों से बचाव में भी आपकी मदद कर सकता हूँ।",
+    marketPrompt: "आप किस फसल का बाजार भाव जानना चाहते हैं? यहाँ प्रमुख भारतीय फसलों की वर्तमान दरें और रुझान दिए गए हैं।",
+    weatherPrompt: "अच्छी फसल के लिए मौसम बहुत महत्वपूर्ण है। यहाँ प्रत्येक मौसम में सबसे अच्छी उगने वाली फसलों की जानकारी दी गई है। क्या आप जानना चाहते हैं कि आज का मौसम बुवाई के लिए उपयुक्त है, या आपके मन में कोई विशेष फसल है?",
+    guidePrompt: "भूमि वॉइस आपका व्यक्तिगत खेती सहायक है। आप माइक बटन पर क्लिक करके मुझसे बात कर सकते हैं, या अपने प्रश्न टाइप कर सकते हैं। तुरंत बीमारी की पहचान के लिए पेपरक्लिप का उपयोग करके बीमार फसलों की फोटो अपलोड करें। बाजार और मौसम के अपडेट के लिए ऊपर दिए गए बटनों का उपयोग करें। मैं अपने सभी जवाब आपको बोलकर सुनाऊंगा!",
     cropHeader: "फसल",
     priceHeader: "भाव (₹/क्विंटल)",
     seasonHeader: "सीजन",
     bestCrops: "बेहतरीन फसलें",
-    trendLabel: "बाजार का रुझान"
+    trendLabel: "बाजार का रुझान (बार चार्ट)"
   },
   bn: { 
     appName: "ভূমি ভয়েস", 
@@ -126,14 +128,15 @@ const UI_STRINGS: Record<string, any> = {
     marketLabel: "বাজার দর",
     weatherLabel: "আবহাওয়ার পূর্বাভাস",
     guideLabel: "সাহায্য নির্দেশিকা",
-    diseasePrompt: "আপনি কোন উদ্ভিদ/ফসলের রোগ সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয় তবে দয়া করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন যাতে আমি সাহায্য করতে পারি। আপনি পোকামাকড় থেকে রক্ষার উপায়ও জিজ্ঞাসা করতে পারেন।",
-    marketPrompt: "আপনি কোন ফসলের বাজার দর জানতে চান?",
-    weatherPrompt: "ভালো ফসলের জন্য আবহাওয়া অত্যন্ত গুরুত্বপূর্ণ। আপনি কি জানতে চান আজকের আবহাওয়ার জন্য কোন ফসলটি সবচেয়ে ভালো, নাকি আপনি কোন ফসল রোপণ করতে চান? আমি সঠিক আবহাওয়া এবং সময়ের পরামর্শ দেব।",
+    diseasePrompt: "আপনি কোন উদ্ভিদ বা ফসলের রোগ সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয়, তবে দয়া করে পেপারক্লিপ আইকন ব্যবহার করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন। আমি আপনাকে পোকামাকড় থেকে ফসল রক্ষা করতেও সাহায্য করতে পারি।",
+    marketPrompt: "আপনি কোন ফসলের বাজার দর জানতে চান? এখানে প্রধান ভারতীয় ফসলের বর্তমান হার এবং প্রবণতা দেওয়া হলো।",
+    weatherPrompt: "ভালো ফসলের জন্য আবহাওয়া অত্যন্ত গুরুত্বপূর্ণ। প্রতিটি ঋতুতে কোন ফসল সবচেয়ে ভালো জন্মায় তার একটি নির্দেশিকা এখানে দেওয়া হলো। আপনি কি জানতে চান আজকের আবহাওয়া চাষের জন্য উপযুক্ত কি না, নাকি আপনার মনে অন্য কোনো নির্দিষ্ট ফসল আছে?",
+    guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে কথা বলতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাওয়ার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
     cropHeader: "ফসল",
     priceHeader: "দাম (টাকা/কুইন্টাল)",
     seasonHeader: "ঋতু",
     bestCrops: "সেরা ফসল",
-    trendLabel: "বাজারের প্রবণতা"
+    trendLabel: "বাজারের প্রবণতা (বার চার্ট)"
   },
   ta: { 
     appName: "பூமி வாய்ஸ்", 
@@ -150,14 +153,15 @@ const UI_STRINGS: Record<string, any> = {
     marketLabel: "சந்தை விலைகள்",
     weatherLabel: "வானிலை முன்னறிவிப்பு",
     guideLabel: "உதவி வழிகாட்டி",
-    diseasePrompt: "எந்த தாவர/பயிர் நோய் பற்றி நீங்கள் தெரிந்து கொள்ள விரும்புகிறீர்கள்? உங்கள் பயிர் ஏதேனும் நோயால் பாதிக்கப்பட்டிருந்தால், தயவுசெய்து ஒரு புகைப்படத்தைப் பதிவேற்றவும் அல்லது சிக்கலை விவரிக்கவும். பூச்சிகளிடமிருந்து பாதுகாப்பது பற்றியும் நீங்கள் கேட்கலாம்.",
-    marketPrompt: "எந்த பயிர் சந்தை விலையை நீங்கள் தெரிந்து கொள்ள விரும்புகிறீர்கள்?",
-    weatherPrompt: "நல்ல அறுவடைக்கு வானிலை மிகவும் முக்கியமானது. இன்றைய வானிலைக்கு எந்த பயிர் சிறந்தது என்பதை அறிய விரும்புகிறீர்களா, அல்லது எந்த பயிரை நடவு செய்ய விரும்புகிறீர்கள்? சிறந்த வானிலை மற்றும் நேரத்தை நான் பரிந்துரைப்பேன்.",
+    diseasePrompt: "எந்த தாவர அல்லது பயிர் நோய் பற்றி நீங்கள் தெரிந்து கொள்ள விரும்புகிறீர்கள்? உங்கள் பயிர் ஏதேனும் நோயால் பாதிக்கப்பட்டிருந்தால், தயவுசெய்து பேப்பர்க்ளிப் ஐகானைப் பயன்படுத்தி ஒரு புகைப்படத்தைப் பதிவேற்றவும் அல்லது சிக்கலை விவரிக்கவும். பூச்சிகளிடமிருந்து பயிரைப் பாதுகாக்கவும் நான் உங்களுக்கு உதவ முடியும்.",
+    marketPrompt: "எந்த பயிர் சந்தை விலையை நீங்கள் தெரிந்து கொள்ள விரும்புகிறீர்கள்? முக்கிய இந்திய பயிர்களின் தற்போதைய விலைகள் மற்றும் போக்குகள் இங்கே உள்ளன.",
+    weatherPrompt: "நல்ல அறுவடைக்கு வானிலை மிகவும் முக்கியமானது. ஒவ்வொரு பருவத்திலும் எந்த பயிர்கள் சிறப்பாக வளரும் என்பதற்கான வழிகாட்டி இங்கே உள்ளது. இன்றைய வானிலை நடவு செய்ய ஏற்றதா என்பதை அறிய விரும்புகிறீர்களா அல்லது உங்கள் மனதில் ஏதேனும் குறிப்பிட்ட பயிர் உள்ளதா?",
+    guidePrompt: "பூமி வாய்ஸ் உங்கள் தனிப்பட்ட விவசாய உதவியாளர். மைக் பட்டனை கிளிக் செய்வதன் மூலம் நீங்கள் என்னுடன் பேசலாம் அல்லது உங்கள் கேள்விகளைத் தட்டச்சு செய்யலாம். பயிர் நோய்களைக் கண்டறிய புகைப்படங்களைப் பதிவேற்ற பேப்பர்க்ளிப்பைப் பயன்படுத்தவும். விரைவான சந்தை மற்றும் வானிலை அறிவிப்புகளுக்கு மேலே உள்ள பொத்தான்களைப் பயன்படுத்தவும். எனது பதில்கள் அனைத்தையும் நான் உங்களுக்குப் பேசிக் காட்டுவேன்!",
     cropHeader: "பயிர்",
     priceHeader: "விலை (₹/குவிண்டால்)",
     seasonHeader: "பருவம்",
     bestCrops: "சிறந்த பயிர்கள்",
-    trendLabel: "சந்தை போக்கு"
+    trendLabel: "சந்தை போக்கு (பார் சார்ட்)"
   },
   mr: { 
     appName: "भूमी व्हॉइस", 
@@ -174,23 +178,24 @@ const UI_STRINGS: Record<string, any> = {
     marketLabel: "बाजार भाव",
     weatherLabel: "हवामान अंदाज",
     guideLabel: "मदत मार्गदर्शक",
-    diseasePrompt: "तुम्हाला कोणत्या झाडाच्या/पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया फोटो अपलोड करा किंवा समस्येचे वर्णन करा. तुम्ही कीड आणि कीटकांपासून संरक्षण कसे करावे हे देखील विचारू शकता.",
-    marketPrompt: "तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचा आहे?",
-    weatherPrompt: "चांगल्या कापणीसाठी हवामान अत्यंत महत्त्वाचे आहे. तुम्हाला आजच्या हवामानासाठी कोणते पीक सर्वोत्तम आहे हे जाणून घ्यायचे आहे का, की तुम्हाला कोणते पीक लावायचे आहे? मी सर्वोत्तम हवामान आणि वेळेची सूचना देईन.",
+    diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा किंवा समस्येचे वर्णन करा. मी कीड आणि कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
+    marketPrompt: "तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचा आहे? प्रमुख भारतीय पिकांचे सध्याचे दर आणि कल येथे दिले आहेत.",
+    weatherPrompt: "चांगल्या कापणीसाठी हवामान अत्यंत महत्त्वाचे आहे. प्रत्येक हंगामात कोणती पिके उत्तम येतात याची माहिती येथे आहे. तुम्हाला आजचे हवामान पेरणीसाठी योग्य आहे का हे जाणून घ्यायचे आहे का, की तुमच्या मनात एखादे विशिष्ट पीक आहे?",
+    guidePrompt: "भूमी व्हॉइस आपला वैयक्तिक शेती सहाय्यक आहे. आपण माइक बटणावर क्लिक करून माझ्याशी बोलू शकता किंवा आपले प्रश्न टाइप करू शकता. पिकांच्या रोगाचे त्वरित निदान करण्यासाठी पेपरक्लिप वापरून फोटो अपलोड करा. बाजार आणि हवामानाच्या अपडेट्ससाठी वरील बटणे वापरा. मी माझी सर्व उत्तरे तुम्हाला बोलून दाखवेन!",
     cropHeader: "पीक",
     priceHeader: "दर (₹/क्विंटल)",
     seasonHeader: "हवामान",
     bestCrops: "सर्वोत्तम पिके",
-    trendLabel: "बाजार कल"
+    trendLabel: "बाजार कल (बार चार्ट)"
   }
 };
 
 const GREETINGS: Record<string, string> = {
-  en: "Hi, what can I help you with?",
-  hi: "नमस्ते, मैं आपकी क्या मदद कर सकता हूँ?",
-  bn: "হাই, আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
-  ta: "வணக்கம், நான் உங்களுக்கு எப்படி உதவ முடியும்?",
-  mr: "नमस्कार, मी तुम्हाला कशी मदत करू शकतो?"
+  en: "Hi, I am Bhoomi. How can I help you today?",
+  hi: "नमस्ते, मैं भूमि हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?",
+  bn: "হাই, আমি ভূমি। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
+  ta: "வணக்கம், நான் பூமி. இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?",
+  mr: "नमस्कार, मी भूमी आहे. आज मी तुम्हाला कशी मदत करू शकतो?"
 };
 
 const MARKET_DATA = [
@@ -208,18 +213,15 @@ const SEASON_DATA = [
 ];
 
 const MARKET_CHART_DATA = [
-  { month: 'Jan', Rice: 2100, Wheat: 2150, Cotton: 6600, Maize: 1850, Mustard: 5300 },
-  { month: 'Feb', Rice: 2120, Wheat: 2180, Cotton: 6700, Maize: 1880, Mustard: 5350 },
-  { month: 'Mar', Rice: 2150, Wheat: 2220, Cotton: 6750, Maize: 1910, Mustard: 5400 },
-  { month: 'Apr', Rice: 2180, Wheat: 2275, Cotton: 6800, Maize: 1950, Mustard: 5450 },
+  { name: 'Rice', price: 2180 },
+  { name: 'Wheat', price: 2275 },
+  { name: 'Cotton', price: 6800 },
+  { name: 'Maize', price: 1950 },
+  { name: 'Mustard', price: 5450 },
 ];
 
 const chartConfig = {
-  Rice: { label: "Rice", color: "hsl(var(--primary))" },
-  Wheat: { label: "Wheat", color: "hsl(var(--accent))" },
-  Cotton: { label: "Cotton", color: "#64748b" },
-  Maize: { label: "Maize", color: "#f59e0b" },
-  Mustard: { label: "Mustard", color: "#10b981" },
+  price: { label: "Price", color: "hsl(var(--primary))" },
 };
 
 export function BhoomiApp({ language }: BhoomiAppProps) {
@@ -234,18 +236,18 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const t = useMemo(() => UI_STRINGS[language.id] || UI_STRINGS.en, [language.id]);
 
-  // Initialize messages once per language change
   useEffect(() => {
+    const welcomeText = GREETINGS[language.id] || GREETINGS.en;
     setMessages([
       {
         id: 'welcome',
         role: 'assistant',
-        content: GREETINGS[language.id] || GREETINGS.en,
+        content: welcomeText,
         suggestions: [
           t.diseaseLabel,
           t.marketLabel,
-          "PM Kisan Scheme",
-          "Organic Fertilizer"
+          t.weatherLabel,
+          t.guideLabel
         ]
       }
     ]);
@@ -258,11 +260,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         recognitionRef.current.interimResults = false;
         
         const localeMap: Record<string, string> = {
-          en: 'en-IN',
-          hi: 'hi-IN',
-          bn: 'bn-IN',
-          ta: 'ta-IN',
-          mr: 'mr-IN'
+          en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
         };
         recognitionRef.current.lang = localeMap[language.id] || 'en-IN';
 
@@ -280,7 +278,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     return () => {
       if (recognitionRef.current) recognitionRef.current.abort();
     };
-  }, [language.id, t.diseaseLabel, t.marketLabel, t.appName]);
+  }, [language.id, t.diseaseLabel, t.marketLabel, t.weatherLabel, t.guideLabel]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -301,11 +299,13 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     return newMsg.id;
   };
 
-  const processResponse = useCallback(async (text: string) => {
+  const processResponse = useCallback(async (text: string, silentUserMsg: boolean = false) => {
     if (!text.trim() || isProcessing) return;
     
     setIsProcessing(true);
-    addMessage({ role: 'user', content: text });
+    if (!silentUserMsg) {
+      addMessage({ role: 'user', content: text });
+    }
     setInput('');
     
     try {
@@ -337,29 +337,28 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (isProcessing) return;
 
     if (action === t.diseaseLabel) {
-      addMessage({ 
-        role: 'assistant', 
-        content: t.diseasePrompt,
-        suggestions: ["Blight on Tomato", "Pest control for Rice", "Whitefly in Cotton"]
-      });
+      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.diseasePrompt}`, true);
     } else if (action === t.marketLabel) {
       addMessage({
         role: 'assistant',
         content: "",
-        type: 'market_data',
-        suggestions: ["Rice price today", "Wheat trend", "Cotton market"]
+        type: 'market_data'
       });
-      addMessage({
-        role: 'assistant',
-        content: t.marketPrompt
-      });
+      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.marketPrompt}`, true);
     } else if (action === t.weatherLabel) {
       addMessage({
         role: 'assistant',
-        content: t.weatherPrompt,
-        type: 'weather_data',
-        suggestions: ["Is it good to plant Wheat today?", "Rain forecast", "Soil moisture status"]
+        content: "",
+        type: 'weather_data'
       });
+      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.weatherPrompt}`, true);
+    } else if (action === t.guideLabel) {
+      addMessage({
+        role: 'assistant',
+        content: "",
+        type: 'guide_data'
+      });
+      await processResponse(`Identify yourself as Bhoomi. Then say exactly: ${t.guidePrompt}`, true);
     } else {
       await processResponse(action);
     }
@@ -405,6 +404,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   };
 
   const formatMessageContent = (content: string) => {
+    if (!content) return null;
     return content.split('\n').map((line, i) => {
       const trimmedLine = line.trim();
       if (!trimmedLine) return <div key={i} className="h-2" />;
@@ -457,17 +457,13 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           <div className="bg-white p-3 rounded-xl border border-primary/10 shadow-sm h-48">
             <h4 className="text-[10px] font-bold text-primary/60 uppercase mb-2">{t.trendLabel}</h4>
             <ChartContainer config={chartConfig} className="h-32 w-full">
-              <ReChartsLineChart data={MARKET_CHART_DATA}>
+              <ReChartsBarChart data={MARKET_CHART_DATA}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="month" hide />
-                <YAxis hide domain={['auto', 'auto']} />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
+                <YAxis hide domain={[0, 8000]} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="Rice" stroke="var(--color-Rice)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="Wheat" stroke="var(--color-Wheat)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="Cotton" stroke="var(--color-Cotton)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="Maize" stroke="var(--color-Maize)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="Mustard" stroke="var(--color-Mustard)" strokeWidth={2} dot={false} />
-              </ReChartsLineChart>
+                <Bar dataKey="price" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={20} />
+              </ReChartsBarChart>
             </ChartContainer>
           </div>
         </div>
@@ -494,6 +490,23 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                 ))}
               </TableBody>
             </Table>
+          </div>
+        </div>
+      );
+    }
+
+    if (msg.type === 'guide_data') {
+      return (
+        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 space-y-3">
+          <div className="flex items-center gap-2 text-primary">
+            <HelpCircle className="w-5 h-5" />
+            <span className="font-bold text-sm">How to use Bhoomi</span>
+          </div>
+          <div className="space-y-2 text-xs leading-relaxed text-foreground/80">
+            <p>• <b>Voice Chat:</b> Tap the Mic button and speak in your local language.</p>
+            <p>• <b>Photo Upload:</b> Use the Paperclip icon to send photos of sick crops for identification.</p>
+            <p>• <b>Fast Actions:</b> Use the top buttons for instant Market, Weather, and Disease help.</p>
+            <p>• <b>Smart Suggestions:</b> Tap the bubbles below my messages for follow-up questions.</p>
           </div>
         </div>
       );
@@ -526,7 +539,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       <div className="p-4 grid grid-cols-4 gap-2 bg-muted/30">
         {[
           { icon: Leaf, label: t.disease, action: t.diseaseLabel, color: 'bg-green-100 text-green-700' },
-          { icon: LineChart, label: t.market, action: t.marketLabel, color: 'bg-amber-100 text-amber-700' },
+          { icon: BarChart3, label: t.market, action: t.marketLabel, color: 'bg-amber-100 text-amber-700' },
           { icon: CloudSun, label: t.weather, action: t.weatherLabel, color: 'bg-blue-100 text-blue-700' },
           { icon: HelpCircle, label: t.guide, action: t.guideLabel, color: 'bg-purple-100 text-purple-700' }
         ].map((item, idx) => (
@@ -548,7 +561,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                   msg.role === 'user' 
                   ? 'bg-primary text-white rounded-tr-none' 
                   : 'bg-white text-foreground rounded-tl-none border border-primary/10'
-                } ${msg.type === 'market_data' || msg.type === 'weather_data' ? 'w-full' : ''}`}
+                } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full' : ''}`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
                   <img src={msg.imageUrl} alt="Uploaded crop" className="w-full rounded-lg mb-3 shadow-sm" />
@@ -582,7 +595,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             <div className="flex justify-start">
               <div className="bg-white border border-primary/10 rounded-2xl rounded-tl-none p-3 shadow-sm flex items-center gap-2">
                 <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is fetching detailed advice...</span>
+                <span className="text-[10px] text-muted-foreground animate-pulse">Bhoomi is thinking...</span>
               </div>
             </div>
           )}
