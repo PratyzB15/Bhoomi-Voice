@@ -114,73 +114,62 @@ User's query: {{{userInputText}}}`,
 });
 
 // Define the Genkit flow
-const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
-  {
-    name: 'voiceAssistedFarmingConsultationFlow',
-    inputSchema: VoiceAssistedFarmingConsultationInputSchema,
-    outputSchema: VoiceAssistedFarmingConsultationOutputSchema,
-  },
-  async (input) => {
-    // 1. Generate text response using the LLM with retry for UNAVAILABLE errors
-    let output;
-    let attempts = 0;
-    const maxAttempts = 3;
-
-    while (attempts < maxAttempts) {
-      try {
-        const result = await farmingConsultantPrompt(input);
-        output = result.output;
-        if (output) break;
-      } catch (e: any) {
-        attempts++;
-        if (attempts >= maxAttempts) throw e;
-        // Faster backoff to stay within total timeout
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
-      }
-    }
-
-    if (!output?.responseText) {
-      throw new Error('No response text generated.');
-    }
-
-    const voiceName = languageToVoiceName[input.selectedLanguage] || 'Algenib';
-
-    // 2. Convert the text response to audio using TTS (with fallback)
-    let audioDataUri: string | undefined;
-    try {
-      const { media } = await ai.generate({
-        model: googleAI.model('gemini-2.5-flash-preview-tts'),
-        config: {
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voiceName },
-            },
-          },
-        },
-        prompt: output.responseText,
-      });
-
-      if (media && media.url) {
-        const base64Pcm = media.url.substring(media.url.indexOf(',') + 1);
-        const audioBuffer = Buffer.from(base64Pcm, 'base64');
-        const wavBase64 = await toWav(audioBuffer);
-        audioDataUri = 'data:audio/wav;base64,' + wavBase64;
-      }
-    } catch (audioError) {
-      // Silence audio error to ensure text reaches the user
-    }
-
-    return {
-      responseText: output.responseText,
-      responseAudio: audioDataUri,
-      followUpQuestions: output.followUpQuestions,
-    };
-  }
-);
-
 export async function voiceAssistedFarmingConsultation(
   input: VoiceAssistedFarmingConsultationInput
 ): Promise<VoiceAssistedFarmingConsultationOutput> {
-  return voiceAssistedFarmingConsultationFlow(input);
+  // 1. Generate text response using the LLM with retry for UNAVAILABLE errors
+  let output;
+  let attempts = 0;
+  const maxAttempts = 3;
+
+  while (attempts < maxAttempts) {
+    try {
+      const result = await farmingConsultantPrompt(input);
+      output = result.output;
+      if (output) break;
+    } catch (e: any) {
+      attempts++;
+      if (attempts >= maxAttempts) throw e;
+      // Faster backoff to stay within total timeout
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+    }
+  }
+
+  if (!output?.responseText) {
+    throw new Error('No response text generated.');
+  }
+
+  const voiceName = languageToVoiceName[input.selectedLanguage] || 'Algenib';
+
+  // 2. Convert the text response to audio using TTS (with fallback)
+  let audioDataUri: string | undefined;
+  try {
+    const { media } = await ai.generate({
+      model: googleAI.model('gemini-2.5-flash-preview-tts'),
+      config: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: voiceName },
+          },
+        },
+      },
+      prompt: output.responseText,
+    });
+
+    if (media && media.url) {
+      const base64Pcm = media.url.substring(media.url.indexOf(',') + 1);
+      const audioBuffer = Buffer.from(base64Pcm, 'base64');
+      const wavBase64 = await toWav(audioBuffer);
+      audioDataUri = 'data:audio/wav;base64,' + wavBase64;
+    }
+  } catch (audioError) {
+    // Silence audio error to ensure text reaches the user
+  }
+
+  return {
+    responseText: output.responseText,
+    responseAudio: audioDataUri,
+    followUpQuestions: output.followUpQuestions,
+  };
 }
