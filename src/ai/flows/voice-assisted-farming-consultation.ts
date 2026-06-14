@@ -91,10 +91,12 @@ FORMATTING RULES:
 2. Use ALL-CAPS followed by a colon for subheadings.
 3. Use the bullet character (•) for bullet points.
 4. Every bullet point MUST start on its own brand new line.
+5. Every subheading MUST start on its own brand new line.
 
 CONTENT RULES:
-1. Provide a DETAILED and INFORMATIVE response. 
-2. Ensure the farmer gets biological reasoning and practical tips.
+1. Provide a DETAILED, DEEP, and INFORMATIVE response.
+2. Cover all aspects of the farmer's query including biological reasoning and practical steps.
+3. Use multiple subheadings to organize information.
 
 Current conversation history:
 {{#if chatHistory}}
@@ -114,8 +116,25 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
     outputSchema: VoiceAssistedFarmingConsultationOutputSchema,
   },
   async (input) => {
-    // 1. Generate text response using the LLM
-    const { output } = await farmingConsultantPrompt(input);
+    // 1. Generate text response using the LLM with retry for UNAVAILABLE errors
+    let output;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        const result = await farmingConsultantPrompt(input);
+        output = result.output;
+        if (output) break;
+      } catch (e: any) {
+        attempts++;
+        console.warn(`AI Generation attempt ${attempts} failed:`, e.message);
+        if (attempts >= maxAttempts) throw e;
+        // Exponential backoff or simple delay
+        await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
+      }
+    }
+
     if (!output?.responseText) {
       throw new Error('No response text generated.');
     }
