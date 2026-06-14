@@ -17,7 +17,7 @@ import wav from 'wav'; // For converting PCM audio to WAV
 // Define input schema for the flow and prompt
 const VoiceAssistedFarmingConsultationInputSchema = z.object({
   userInputText: z.string().describe("The farmer's transcribed voice input."),
-  selectedLanguage: z.enum(['en', 'hi', 'bn', 'ta', 'mr']).describe("The user's selected language code."),
+  selectedLanguage: z.enum(['en', 'hi', 'bn', 'ta', 'mr']).describe("The user's selected language ('en' for English, 'hi' for Hindi, 'bn' for Bengali, 'ta' for Tamil, 'mr' for Marathi)."),
   chatHistory: z.array(z.object({
     role: z.enum(['user', 'model']),
     content: z.string(),
@@ -86,7 +86,7 @@ const farmingConsultantPrompt = ai.definePrompt({
 Your goal is to provide high-quality, comprehensive, and detailed advice to farmers transitioning to or practicing natural farming.
 
 STRICT LANGUAGE RULE:
-You must respond entirely and exclusively in the following language: {{selectedLanguage}} ({{#if (eq selectedLanguage "en")}}English{{/if}}{{#if (eq selectedLanguage "hi")}}Hindi{{/if}}{{#if (eq selectedLanguage "bn")}}Bengali{{/if}}{{#if (eq selectedLanguage "ta")}}Tamil{{/if}}{{#if (eq selectedLanguage "mr")}}Marathi{{/if}}).
+You must respond entirely and exclusively in the following language code: {{selectedLanguage}} (en=English, hi=Hindi, bn=Bengali, ta=Tamil, mr=Marathi).
 
 FORMATTING RULES (CRITICAL):
 1. DO NOT use any markdown markers like '*', '#', '_', or '\`'.
