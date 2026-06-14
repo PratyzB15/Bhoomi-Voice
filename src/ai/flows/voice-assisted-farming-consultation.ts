@@ -133,10 +133,9 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
         if (output) break;
       } catch (e: any) {
         attempts++;
-        console.warn(`AI Generation attempt ${attempts} failed:`, e.message);
         if (attempts >= maxAttempts) throw e;
         // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
+        await new Promise(resolve => setTimeout(resolve, 1500 * attempts));
       }
     }
 
@@ -169,8 +168,7 @@ const voiceAssistedFarmingConsultationFlow = ai.defineFlow(
         audioDataUri = 'data:audio/wav;base64,' + wavBase64;
       }
     } catch (audioError) {
-      console.error('TTS synthesis failed, continuing with text only:', audioError);
-      // We don't throw here to ensure the text reaches the user
+      // We don't throw here to ensure the text reaches the user even if TTS fails or times out
     }
 
     return {

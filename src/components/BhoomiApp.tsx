@@ -70,7 +70,7 @@ const UI_STRINGS: Record<string, any> = {
     placeholder: "Ask anything...", 
     verified: "Verified", 
     liveRates: "Live Rates",
-    error: "I'm sorry, I encountered an error.",
+    error: "I'm sorry, I encountered an error. Please try again.",
     analyzing: "Checking crop health...",
     diseaseLabel: "Disease Identification",
     marketLabel: "Market Prices",
@@ -95,7 +95,7 @@ const UI_STRINGS: Record<string, any> = {
     placeholder: "कुछ भी पूछें...", 
     verified: "सत्यापित", 
     liveRates: "ताजा दर",
-    error: "क्षमा करें, मुझे एक त्रुटि मिली।",
+    error: "क्षमा करें, मुझे एक त्रुटि मिली। कृपया पुनः प्रयास करें।",
     analyzing: "फसल के स्वास्थ्य की जाँच हो रही है...",
     diseaseLabel: "रोग पहचान",
     marketLabel: "बाजार भाव",
@@ -103,7 +103,7 @@ const UI_STRINGS: Record<string, any> = {
     guideLabel: "सहायता मार्गदर्शिका",
     diseasePrompt: "आप किस पौधे या फसल के रोग के बारे में जानना चाहते हैं? यदि आपकी फसल किसी बीमारी का सामना कर रही है, तो कृपया पेपरक्लिप आइकन का उपयोग करके एक फोटो अपलोड करें या समस्या का वर्णन करें। मैं कीटों से बचाव में भी आपकी मदद कर सकता हूँ।",
     marketPrompt: "आप किस फसल का बाजार भाव जानना चाहते हैं? यहाँ प्रमुख भारतीय फसलों की वर्तमान दरें और रुझान दिए गए हैं।",
-    weatherPrompt: "अच्छी फसल के लिए मौसम बहुत महत्वपूर्ण है। यहाँ प्रत्येक मौसम में सबसे अच्छी उगने वाली फसलों की जानकारी दी गई है। क्या आप जानना चाहते हैं कि आज का मौसम बुवाई के लिए उपयुक्त है, या आपके मन में कोई विशेष फसल है?",
+    weatherPrompt: "अच्छी फसल के लिए मौसम बहुत महत्वपूर्ण है। यहाँ प्रत्येक मौसम में सबसे अच्छी उगने वाली फसलों की जानकारी दी गई है। क्या आप जानना चाहते हैं कि आज का मौसम बुवाई के लिए उपयुक्त है, या आपके मन में एक विशेष फसल है?",
     guidePrompt: "भूमि वॉइस आपका व्यक्तिगत खेती सहायक है। आप माइक बटन पर क्लिक करके मुझसे बात कर सकते हैं, या अपने प्रश्न टाइप कर सकते हैं। तुरंत बीमारी की पहचान के लिए पेपरक्लिप का उपयोग करके बीमार फसलों की फोटो अपलोड करें। बाजार और मौसम के अपडेट के लिए ऊपर दिए गए बटनों का उपयोग करें। मैं अपने सभी जवाब आपको बोलकर सुनाऊंगा!",
     cropHeader: "फसल",
     priceHeader: "भाव (₹/क्विंटल)",
@@ -120,7 +120,7 @@ const UI_STRINGS: Record<string, any> = {
     placeholder: "কিছু জিজ্ঞাসা করুন...", 
     verified: "যাচাইকৃত", 
     liveRates: "লাইভ রেট",
-    error: "দুঃখিত, আমি একটি ত্রুটির সম্মুখীন হয়েছি।",
+    error: "দুঃখিত, আমি একটি ত্রুটির সম্মুখীন হয়েছি। দয়া করে আবার চেষ্টা করুন।",
     analyzing: "ফসলের স্বাস্থ্য পরীক্ষা করা হচ্ছে...",
     diseaseLabel: "রোগ শনাক্তকরণ",
     marketLabel: "বাজার দর",
@@ -145,7 +145,7 @@ const UI_STRINGS: Record<string, any> = {
     placeholder: "எதையும் கேளுங்கள்...", 
     verified: "சரிபார்க்கப்பட்டது", 
     liveRates: "நேரடி விலைகள்",
-    error: "மன்னிக்கவும், நான் ஒரு பிழையைச் சந்தித்தேன்.",
+    error: "மன்னிக்கவும், நான் ஒரு பிழையைச் சந்தித்தேன். மீண்டும் முயற்சிக்கவும்.",
     analyzing: "பயிர் ஆரோக்கியத்தை சரிபார்க்கிறது...",
     diseaseLabel: "நோய் அடையாளம்",
     marketLabel: "சந்தை விலைகள்",
@@ -170,13 +170,13 @@ const UI_STRINGS: Record<string, any> = {
     placeholder: "काहीही विचारा...", 
     verified: "सत्यापित", 
     liveRates: "थेट दर",
-    error: "क्षमस्व, मला एक त्रुटी आली.",
+    error: "क्षमस्व, मला एक त्रुटी आली. कृपया पुन्हा प्रयत्न करा.",
     analyzing: "पिकाच्या आरोग्याची तपासणी होत आहे...",
     diseaseLabel: "रोग ओळख",
     marketLabel: "बाजार भाव",
     weatherLabel: "हवामान अंदाज",
     guideLabel: "मदत मार्गदर्शक",
-    diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा किंवा समस्येचे वर्णन करा. मी कीड आणि कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
+    diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा किंवा समस्येचे वर्णन करा. मी कीड और कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
     marketPrompt: "तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचे आहे? प्रमुख भारतीय पिकांचे सध्याचे दर और कल येथे दिले आहेत.",
     weatherPrompt: "चांगल्या कापणीसाठी हवामान अत्यंत महत्त्वाचे आहे. प्रत्येक हंगामात कोणती पिके उत्तम येतात याची माहिती येथे आहे. तुम्हाला आजचे हवामान पेरणीसाठी योग्य आहे का हे जाणून घ्यायचे आहे का, की तुमच्या मनात एखादे विशिष्ट पीक आहे?",
     guidePrompt: "भूमी व्हॉइस आपला वैयक्तिक शेती सहाय्यक आहे. आपण माइक बटणावर क्लिक करून माझ्याशी बोलू शकता किंवा आपले प्रश्न टाइप करू शकता. पिकांच्या रोगाचे त्वरित निदान करण्यासाठी पेपरक्लिप वापरून फोटो अपलोड करा. बाजार आणि हवामानाच्या अपडेट्ससाठी वरील बटणे वापरा. मी माझी सर्व उत्तरे तुम्हाला बोलून दाखवेन!",
@@ -316,7 +316,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     return () => {
       if (recognitionRef.current) recognitionRef.current.abort();
     };
-  }, [language.id]);
+  }, [language.id, t.diseaseLabel, t.marketLabel, t.weatherLabel, t.guideLabel]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -328,14 +328,14 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(base64Audio);
     audioRef.current = audio;
-    audio.play().catch(e => console.error("Audio playback blocked:", e));
+    audio.play().catch(() => {});
   };
 
-  const addMessage = (msg: Omit<Message, 'id'>) => {
+  const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
     const newMsg = { ...msg, id: Math.random().toString(36).substr(2, 9) };
     setMessages(prev => [...prev, newMsg]);
     return newMsg.id;
-  };
+  }, []);
 
   const processResponse = useCallback(async (text: string, silentUserMsg: boolean = false) => {
     if (!text.trim() || isProcessing) return;
@@ -364,12 +364,11 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
       if (result.responseAudio) playAudio(result.responseAudio);
     } catch (error) {
-      console.error("Consultation Flow Error:", error);
       addMessage({ role: 'assistant', content: t.error });
     } finally {
       setIsProcessing(false);
     }
-  }, [language.id, messages, t.error, isProcessing]);
+  }, [language.id, messages, t.error, isProcessing, addMessage]);
 
   const handleAction = async (action: string) => {
     if (isProcessing) return;
@@ -616,11 +615,11 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
-                className={`max-w-[88%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 break-words relative z-20 ${
+                className={`max-w-[90%] rounded-2xl p-4 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 break-words relative z-20 ${
                   msg.role === 'user' 
                   ? 'bg-primary text-white rounded-tr-none ml-auto' 
                   : 'bg-white/95 backdrop-blur-md text-foreground rounded-tl-none border border-primary/10 mr-auto shadow-lg'
-                } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full max-w-[94%]' : ''}`}
+                } ${msg.type === 'market_data' || msg.type === 'weather_data' || msg.type === 'guide_data' ? 'w-full max-w-[95%]' : ''}`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
                   <img src={msg.imageUrl} alt="Uploaded crop" className="w-full rounded-lg mb-3 shadow-sm object-cover" />
@@ -634,7 +633,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
               </div>
               
               {msg.suggestions && msg.suggestions.length > 0 && !isProcessing && (
-                <div className="mt-3 flex flex-wrap gap-2 justify-start max-w-[92%] relative z-20">
+                <div className="mt-3 flex flex-wrap gap-2 justify-start max-w-[95%] relative z-20">
                   {msg.suggestions.map((suggestion, idx) => (
                     <Button 
                       key={idx} 
