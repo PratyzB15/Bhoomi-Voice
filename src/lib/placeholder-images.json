@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-farm",
+      "description": "Lush green farm in rural India",
+      "imageUrl": "https://picsum.photos/seed/farm1/800/1200",
+      "imageHint": "lush green farm india"
+    },
+    {
+      "id": "soil-hands",
+      "description": "Hands holding rich brown soil",
+      "imageUrl": "https://picsum.photos/seed/soil/400/400",
+      "imageHint": "fertile soil hands"
+    }
+  ]
 }
