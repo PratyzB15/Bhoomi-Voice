@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -86,7 +85,8 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "Price (₹/Qtl)",
     seasonHeader: "Season",
     bestCrops: "Best Crops",
-    trendLabel: "Market Trend"
+    trendLabel: "Market Trend",
+    greeting: "Hi, I am Bhoomi. How can I help u today?"
   },
   hi: { 
     appName: "भूमि वॉइस", 
@@ -111,7 +111,8 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "भाव (₹/क्विंटल)",
     seasonHeader: "सीजन",
     bestCrops: "बेहतरीन फसलें",
-    trendLabel: "बाजार का रुझान"
+    trendLabel: "बाजार का रुझान",
+    greeting: "नमस्ते, मैं भूमि हूँ। मैं आज आपकी क्या मदद कर सकता हूँ?"
   },
   bn: { 
     appName: "ভূমি ভয়েস", 
@@ -124,7 +125,7 @@ const UI_STRINGS: Record<string, any> = {
     liveRates: "লাইভ রেট",
     error: "দুঃখিত, আমি একটি কিছত্রुটির সম্মুখীন হয়েছি। দয়া করে फिर से চেষ্টা করুন।",
     analyzing: "ফসলের স্বাস্থ্য পরীক্ষা করা হচ্ছে...",
-    diseaseLabel: "रोग শনাক্তকরণ",
+    diseaseLabel: "রোগ শনাক্তকরণ",
     marketLabel: "বাজার দর",
     weatherLabel: "আবহাওয়ার পূর্বাভাস",
     guideLabel: "সাহায্য নির্দেশিকা",
@@ -136,7 +137,8 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "দাম (টাকা/কুইন্টাল)",
     seasonHeader: "ঋতু",
     bestCrops: "সেরা ফসল",
-    trendLabel: "বাজারের প্রবণতা"
+    trendLabel: "বাজারের প্রবণতা",
+    greeting: "হাই, আমি ভূমি। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?"
   },
   ta: { 
     appName: "பூமி வாய்ஸ்", 
@@ -161,7 +163,8 @@ const UI_STRINGS: Record<string, any> = {
     priceHeader: "விலை (₹/குவிண்டால்)",
     seasonHeader: "பருவம்",
     bestCrops: "சிறந்த பயிர்கள்",
-    trendLabel: "சந்தை போக்கு"
+    trendLabel: "சந்தை போக்கு",
+    greeting: "வணக்கம், நான் பூமி. இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?"
   },
   mr: { 
     appName: "भूमी व्हॉइस", 
@@ -181,21 +184,14 @@ const UI_STRINGS: Record<string, any> = {
     diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा या समस्येचे वर्णन करा जेणेकरून मी तुम्हाला मदत करू शकेन. मी कीड आणि कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
     marketPrompt: "सध्याचे मंडी दर खाली सूचीबद्ध आहेत. तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचे आहे?",
     weatherPrompt: "चांगल्या कापणीसाठी हवामान अत्यंत महत्त्वाचे आहे. प्रत्येक हंगामात कोणती पिके उत्तम येतात याची माहिती येथे आहे. तुम्हाला आजचे हवामान पेरणीसाठी योग्य आहे का हे जाणून घ्यायचे आहे का, की तुमच्या मनात एखादे विशिष्ट पीक आहे? मी तुम्हाला सर्वोत्तम हवामानाचा सल्ला देईन.",
-    guidePrompt: "भूमी व्हॉइस आपला वैयक्तिक शेती सहाय्यक आहे. आपण माइक बटणावर क्लिक करून माझ्याशी बोलू शकता किंवा आपले प्रश्न टाइप करू शकता. पिकांच्या रोगाचे त्वरित निदान करण्यासाठी पेपरक्लिप वापरून फोटो अपलोड करा. बाजार आणि हवामानाच्या अपडेट्ससाठी वरील बटणे वापरा. मी माझी सर्व उत्तरे तुम्हाला बोलून दाखवेन!",
+    guidePrompt: "भूमी व्हॉइस आपला वैयक्तिक शेती सहाय्यक आहे. आपण माइक बटणावर क्लिक करून माझ्याशी बोलू शकता किंवा आपले प्रश्न टाइप करू शकता. पिकांच्या रोगाचे त्वरित निदान करण्यासाठी पेपरक्लिप वापरून फोटो अपलोड करा. बाजार और हवामानाच्या अपडेट्ससाठी वरील बटणे वापरा. मी माझी सर्व उत्तरे तुम्हाला बोलून दाखवेन!",
     cropHeader: "पीक",
     priceHeader: "दर (₹/क्विंटल)",
     seasonHeader: "हवामान",
     bestCrops: "सर्वोत्तम पिके",
-    trendLabel: "बाजार कल"
+    trendLabel: "बाजार कल",
+    greeting: "नमस्कार, मी भूमी आहे. मी आज तुम्हाला कशी मदत करू शकतो?"
   }
-};
-
-const GREETINGS: Record<string, string> = {
-  en: "Hi, what can I help with u today?",
-  hi: "नमस्ते, आज मैं आपकी क्या मदद कर सकता हूँ?",
-  bn: "হাই, আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
-  ta: "வணக்கம், இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?",
-  mr: "नमस्कार, आज मी तुम्हाला कशी मदत करू शकतो?"
 };
 
 const getLocalizedMarketData = (lang: string) => {
@@ -243,7 +239,7 @@ const getLocalizedSeasonData = (lang: string) => {
     ],
     bn: [
       { season: 'খরিফ (জুন-অক্টোবর)', crops: 'চাল, ভুট্টা, তুলা' },
-      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষা, মটর' },
+      { season: 'রবি (নভেম্বর-মার्च)', crops: 'গম, সরিষা, মটর' },
       { season: 'জায়েদ (মার্চ-জুন)', crops: 'তরমুজ, মুগ' }
     ],
     ta: [
@@ -276,18 +272,24 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const t = useMemo(() => UI_STRINGS[language.id] || UI_STRINGS.en, [language.id]);
 
-  const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
-    const newMsg = { ...msg, id: Math.random().toString(36).substr(2, 9) };
-    setMessages(prev => [...prev, newMsg]);
-    return newMsg.id;
-  }, []);
-
   const playAudio = useCallback((base64Audio: string) => {
     if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(base64Audio);
     audioRef.current = audio;
     audio.play().catch(() => {});
   }, []);
+
+  const triggerAudioOnly = useCallback(async (text: string) => {
+    try {
+      const result = await voiceAssistedFarmingConsultation({
+        userInputText: text,
+        selectedLanguage: language.id as any,
+      });
+      if (result.responseAudio) playAudio(result.responseAudio);
+    } catch (e) {
+      console.error("Audio trigger failed", e);
+    }
+  }, [language.id, playAudio]);
 
   const processResponse = useCallback(async (text: string, silentUserMsg: boolean = false, specialType?: 'market_data' | 'weather_data' | 'guide_data') => {
     if (!text.trim() || isProcessing) return;
@@ -323,34 +325,29 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     } finally {
       setIsProcessing(false);
     }
-  }, [language.id, messages, t.error, isProcessing, addMessage, playAudio]);
+  }, [language.id, messages, t.error, isProcessing, playAudio]);
+
+  const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
+    const newMsg = { ...msg, id: Math.random().toString(36).substr(2, 9) };
+    setMessages(prev => [...prev, newMsg]);
+    return newMsg.id;
+  }, []);
 
   useEffect(() => {
-    const welcomeText = GREETINGS[language.id] || GREETINGS.en;
-    
     const initApp = async () => {
-      setIsProcessing(true);
-      try {
-        const result = await voiceAssistedFarmingConsultation({
-          userInputText: welcomeText,
-          selectedLanguage: language.id as any,
-        });
-        
-        setMessages([
-          {
-            id: 'welcome',
-            role: 'assistant',
-            content: result.responseText,
-            suggestions: [] // Specific prompt asks for NO suggestions initially
-          }
-        ]);
-        
-        if (result.responseAudio) playAudio(result.responseAudio);
-      } catch (e) {
-        setMessages([{ id: 'welcome', role: 'assistant', content: welcomeText }]);
-      } finally {
-        setIsProcessing(false);
-      }
+      // Hardcoded greeting as requested, skipping LLM connection for content
+      const welcomeText = t.greeting;
+      setMessages([
+        {
+          id: 'welcome',
+          role: 'assistant',
+          content: welcomeText,
+          suggestions: []
+        }
+      ]);
+      
+      // Still trigger TTS for the localized greeting so it's read out
+      triggerAudioOnly(welcomeText);
     };
 
     initApp();
@@ -381,7 +378,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     return () => {
       if (recognitionRef.current) recognitionRef.current.abort();
     };
-  }, [language.id, playAudio]);
+  }, [language.id, triggerAudioOnly, t.greeting]);
 
   useEffect(() => {
     if (scrollRef.current) {
