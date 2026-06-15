@@ -116,7 +116,7 @@ const UI_STRINGS: Record<string, any> = {
   },
   bn: { 
     appName: "ভূমি ভয়েস", 
-    disease: "रोग", 
+    disease: "রোগ", 
     market: "বাজার", 
     weather: "আবহাওয়া", 
     guide: "গাইড", 
@@ -125,14 +125,14 @@ const UI_STRINGS: Record<string, any> = {
     liveRates: "লাইভ রেট",
     error: "দুঃখিত, আমি একটি কিছত্রुটির সম্মুখীন হয়েছি। দয়া করে फिर से कोशिश করুন।",
     analyzing: "ফসলের স্বাস্থ্য परीक्षा করা হচ্ছে...",
-    diseaseLabel: "रोग শনাক্তকরণ",
+    diseaseLabel: "রোগ শনাক্তকরণ",
     marketLabel: "বাজার দর",
     weatherLabel: "আবহাওয়ার পূর্বাভাস",
     guideLabel: "সাহায্য নির্দেশিকা",
     diseasePrompt: "আপনি কোন উদ্ভিদ বা ফসলের रोग সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয়, তবে দয়া করে পেপারক্লিপ আইকন ব্যবহার করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন যাতে আমি আপনাকে সাহায্য করতে পারি। আমি আপনাকে পোকামাকড় এবং কীট থেকে ফসল রক্ষা করতেও সাহায্য করতে পারি।",
     marketPrompt: "বর্তমান মান্ডি রেটগুলি নীচে দেওয়া হয়েছে। আপনি কোন ফসলের বাজার দর জানতে চান?",
     weatherPrompt: "ভালো ফসলের জন্য আবহাওয়া অত্যন্ত গুরুত্বপূর্ণ। প্রতিটি ঋতুতে কোন ফসল সবচেয়ে ভালো জন্মায় তার একটি নির্দেশিকা এখানে দেওয়া হলো। আপনি কি জানতে চান আজকের আবহাওয়া চাষের জন্য উপযুক্ত কি না, নাকি আপনার মনে অন্য কোনো নির্দিষ্ট ফসল আছে? আমি আপনাকে সেরা আবহাওয়ার পরামর্শ দেব।",
-    guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে কথা বলতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাওয়ার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
+    guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে बात করতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাওয়ার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
     cropHeader: "ফসল",
     priceHeader: "দাম (টাকা/কুইন্টাল)",
     seasonHeader: "ঋতু",
@@ -181,8 +181,8 @@ const UI_STRINGS: Record<string, any> = {
     marketLabel: "बाजार भाव",
     weatherLabel: "हवामान अंदाज",
     guideLabel: "मदत मार्गदर्शक",
-    diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा या समस्येचे वर्णन करा जेणेकरून मी तुम्हाला मदत करू शकेन. मी कीड आणि कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
-    marketPrompt: "सध्याचे मंडी दर खाली सूचीबद्ध आहेत. तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचे आहे?",
+    diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा या समस्येचे वर्णन करा जेणेकरून मी आपको मदत करू शकेन. मी कीड और कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
+    marketPrompt: "सध्याचे मंडी दर खाली सूचीबद्ध आहेत। तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचे आहे?",
     weatherPrompt: "चांगल्या कापणीसाठी हवामान अत्यंत महत्त्वाचे आहे. प्रत्येक हंगामात कोणती पिके उत्तम येतात याची माहिती येथे आहे. तुम्हाला आजचे हवामान पेरणीसाठी योग्य आहे का हे जाणून घ्यायचे आहे का, की तुमच्या मनात एखादे विशिष्ट पीक आहे? मी तुम्हाला सर्वोत्तम हवामानाचा सल्ला देईन.",
     guidePrompt: "भूमी व्हॉइस आपला वैयक्तिक शेती सहाय्यक आहे. आपण माइक बटणावर क्लिक करून माझ्याशी बोलू शकता किंवा आपले प्रश्न टाइप करू शकता. पिकांच्या रोगाचे त्वरित निदान करण्यासाठी पेपरक्लिप वापरून फोटो अपलोड करा. बाजार और हवामानाच्या अपडेट्ससाठी वरील बटणे वापरा. मी माझी सर्व उत्तरे तुम्हाला बोलून दाखवेन!",
     cropHeader: "पीक",
@@ -239,12 +239,12 @@ const getLocalizedSeasonData = (lang: string) => {
     ],
     bn: [
       { season: 'খরিফ (জুন-অক্টোবর)', crops: 'চাল, ভুট্টা, তুলা' },
-      { season: 'রবি (নভেম্বর-মার्च)', crops: 'গম, সরিষা, মটর' },
+      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষা, মটর' },
       { season: 'জায়েদ (মার্চ-জুন)', crops: 'তরমুজ, মুগ' }
     ],
     ta: [
       { season: 'காரிஃப் (ஜூன்-அக்டோபர்)', crops: 'அரிசி, சோளம், பருத்தி' },
-      { season: 'ரபி (நவம்பர்-மார்ச்)', crops: 'கோதுமை, கடுகு, பட்டாணி' },
+      { season: 'ரபி (நவம்பர்-மார்ச்)', crops: 'கோதுமை, கடுगु, பட்டாணி' },
       { season: 'சையத் (மார்ச்-ஜூன்)', crops: 'தர்பூசணி, பாசிப்பயறு' }
     ],
     mr: [
@@ -274,14 +274,15 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const speakLocal = useCallback((text: string) => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-      // Cancel any ongoing speech
+      // Cancel any ongoing speech to ensure current one is heard
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       const langMap: Record<string, string> = {
         en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
       };
       utterance.lang = langMap[language.id] || 'en-IN';
-      utterance.rate = 0.9; // Slightly slower for better clarity
+      utterance.rate = 0.9; 
+      utterance.pitch = 1.0;
       window.speechSynthesis.speak(utterance);
     }
   }, [language.id]);
@@ -295,18 +296,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     audioRef.current = audio;
     audio.play().catch(() => {});
   }, []);
-
-  const triggerAudioOnly = useCallback(async (text: string) => {
-    try {
-      const result = await voiceAssistedFarmingConsultation({
-        userInputText: text,
-        selectedLanguage: language.id as any,
-      });
-      if (result.responseAudio) playAudio(result.responseAudio);
-    } catch (e) {
-      console.error("Audio trigger failed", e);
-    }
-  }, [language.id, playAudio]);
 
   const processResponse = useCallback(async (text: string, silentUserMsg: boolean = false, specialType?: 'market_data' | 'weather_data' | 'guide_data') => {
     if (!text.trim() || isProcessing) return;
@@ -351,23 +340,18 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   }, []);
 
   useEffect(() => {
-    const initApp = () => {
-      // 1. Set the localized greeting instantly without AI
-      const welcomeText = t.greeting;
-      setMessages([
-        {
-          id: 'welcome',
-          role: 'assistant',
-          content: welcomeText,
-          suggestions: []
-        }
-      ]);
-      
-      // 2. Speak it out immediately using browser's local TTS (no AI needed)
-      speakLocal(welcomeText);
-    };
-
-    initApp();
+    const welcomeText = t.greeting;
+    setMessages([
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: welcomeText,
+        suggestions: []
+      }
+    ]);
+    
+    // Immediate voice playback with a tiny delay to ensure synthesis is ready
+    const timer = setTimeout(() => speakLocal(welcomeText), 500);
 
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -393,6 +377,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     }
     
     return () => {
+      clearTimeout(timer);
       if (recognitionRef.current) recognitionRef.current.abort();
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.cancel();
