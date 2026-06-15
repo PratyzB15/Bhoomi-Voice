@@ -16,7 +16,8 @@ import {
   ChevronLeft,
   Volume2,
   Loader2,
-  Square
+  Square,
+  Sprout
 } from 'lucide-react';
 import { voiceAssistedFarmingConsultation } from '@/ai/flows/voice-assisted-farming-consultation';
 import { cropDiseaseImageAnalysis } from '@/ai/flows/crop-disease-image-analysis';
@@ -561,16 +562,43 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   return (
     <div className="mobile-stage flex flex-col bg-white nature-bg relative overflow-hidden">
-      {/* Decorative nature background elements */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute -top-10 -left-10 w-48 h-48 animate-sway text-primary/20">
-          <Leaf className="w-full h-full" />
-        </div>
-        <div className="absolute top-1/2 -right-10 w-40 h-40 animate-float-nature text-accent/20">
+      {/* Enhanced animated nature background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Sky Elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 opacity-10 animate-float-nature text-blue-400">
           <CloudSun className="w-full h-full" />
         </div>
-        <div className="absolute bottom-1/4 -left-10 w-32 h-32 animate-sway text-primary/10" style={{ animationDelay: '2s' }}>
+        
+        {/* Floating Leaves */}
+        <div className="absolute top-1/4 right-5 w-16 h-16 opacity-10 animate-sway text-primary">
           <Leaf className="w-full h-full" />
+        </div>
+        <div className="absolute top-1/2 left-5 w-12 h-12 opacity-10 animate-sway text-primary" style={{ animationDelay: '3s' }}>
+          <Leaf className="w-full h-full rotate-45" />
+        </div>
+
+        {/* Animated Sprouts/Plants across the bottom field */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 flex items-end justify-around px-8 opacity-20 z-0">
+          {[...Array(8)].map((_, i) => (
+            <div 
+              key={i} 
+              className="w-10 h-32 animate-sway-intense text-primary" 
+              style={{ 
+                animationDelay: `${i * 0.7}s`, 
+                transformOrigin: 'bottom center',
+                opacity: 0.15 + (i % 3) * 0.1
+              }}
+            >
+              <Sprout className="w-full h-full stroke-[1.5]" />
+            </div>
+          ))}
+        </div>
+
+        {/* Large Decorative SVG Blobs */}
+        <div className="absolute -top-20 -right-20 w-80 h-80 opacity-5 animate-float-nature" style={{ animationDelay: '1s' }}>
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path fill="hsl(var(--primary))" d="M44.7,-76.4C58.3,-69.2,70.1,-58.5,77.9,-45.5C85.7,-32.5,89.5,-17.2,88.4,-2.4C87.3,12.4,81.3,26.7,73.1,39.6C64.9,52.5,54.5,64,41.9,71.2C29.3,78.4,14.7,81.3,0.1,81.2C-14.5,81.1,-29.1,78,-41.8,70.8C-54.5,63.6,-65.4,52.3,-73,39.3C-80.6,26.3,-84.9,11.6,-84.3,-2.8C-83.7,-17.2,-78.2,-31.3,-69.5,-43.3C-60.8,-55.3,-48.9,-65.2,-35.8,-72.7C-22.7,-80.2,-8.4,-85.3,3.1,-90.7C14.6,-96.1,29.3,-101.8,44.7,-76.4Z" transform="translate(100 100)" />
+          </svg>
         </div>
       </div>
 

@@ -44,6 +44,11 @@
   50% { transform: rotate(3deg) translateY(-8px); }
 }
 
+@keyframes sway-intense {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
 @keyframes float-slow {
   0%, 100% { transform: translateY(0) translateX(0); }
   50% { transform: translateY(-15px) translateX(10px); }
@@ -59,17 +64,24 @@
   transform-origin: bottom center;
 }
 
+.animate-sway-intense {
+  animation: sway-intense 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
 .animate-float-nature {
   animation: float-slow 12s ease-in-out infinite;
 }
 
 .nature-bg {
-  background: radial-gradient(circle at top right, rgba(46, 91, 61, 0.05) 0%, transparent 70%),
-              radial-gradient(circle at bottom left, rgba(212, 160, 23, 0.05) 0%, transparent 70%);
+  background: 
+    radial-gradient(circle at 0% 0%, rgba(46, 91, 61, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
+    linear-gradient(to bottom, #f0f4ef 0%, #ffffff 100%);
 }
 
 .glass-morphism {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
 }
 
 .mobile-stage {
