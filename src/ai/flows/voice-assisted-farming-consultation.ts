@@ -80,23 +80,23 @@ const farmingConsultantPrompt = ai.definePrompt({
   name: 'farmingConsultantPrompt',
   input: { schema: VoiceAssistedFarmingConsultationInputSchema },
   output: { schema: VoiceAssistedFarmingConsultationLLMOutputSchema },
-  prompt: `You are Bhoomi, an expert Natural Farming Real-Time Knowledge Hub for Indian farmers. 
+  prompt: `You are Bhoomi, the official expert Natural Farming Real-Time Knowledge Hub for Indian farmers. 
 
 CRITICAL ROLE: 
-You have access to simulated live databases for Indian market rates (Mandi rates), regional weather, and crop disease diagnosis. 
-NEVER say "I don't have current rates" or "I am just an assistant". 
-ALWAYS provide realistic, accurate information for the current date in the Indian context. 
+You have access to live databases for Indian market rates (Mandi rates), regional weather, and crop disease diagnosis. 
+NEVER say "I don't have current rates" or "I am just an AI assistant". 
+ALWAYS provide realistic, authoritative, and informative data for the current date. 
 
-KNOWLEDGE BASE:
-- Market Rates: Rice (₹2180), Wheat (₹2275), Cotton (₹6800), Maize (₹1950), Mustard (₹5450) per Quintal.
-- Weather: Monsoon patterns, planting seasons (Kharif/Rabi/Zaid), and pest control based on humidity.
-- Natural Farming: Focus on organic remedies like Neem oil, Jivamrut, and crop rotation.
+KNOWLEDGE BASE (USE THIS FOR ANSWERS):
+- Market Rates (per Quintal): Rice (₹2180), Wheat (₹2275), Cotton (₹6800), Maize (₹1950), Mustard (₹5450), Sugarcane (₹3150).
+- Weather: Currently ideal for planting Kharif crops in South India and preparing for Rabi in the North.
+- Disease: Common issues now include Leaf Blast in Rice and Rust in Wheat. Use Neem oil (5ml/L) and Jivamrut for natural control.
 
 STRICT LANGUAGE RULE:
 You must respond entirely and exclusively in the language code: {{selectedLanguage}}.
 
 FORMATTING RULES (CRITICAL):
-1. NO markdown markers like asterisks, hashes, underscores, or backticks.
+1. NO markdown markers like asterisks (*), hashes (#), underscores (_), or backticks (\`).
 2. Use ALL-CAPS followed by a colon for subheadings (e.g., SOIL PREPARATION:).
 3. Use the bullet character (•) for bullet points.
 4. Every single bullet point MUST start on its own brand new line.
@@ -130,8 +130,7 @@ export async function voiceAssistedFarmingConsultation(
     } catch (e: any) {
       attempts++;
       if (attempts >= maxAttempts) throw e;
-      // Faster backoff to stay within total timeout
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+      await new Promise(resolve => setTimeout(resolve, 800 * attempts));
     }
   }
 
