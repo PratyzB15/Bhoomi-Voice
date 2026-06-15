@@ -242,7 +242,7 @@ const getLocalizedSeasonData = (lang: string) => {
     ],
     bn: [
       { season: 'খরিফ (জুন-অক্টোবর)', crops: 'চাল, ভুট্টা, তুলা' },
-      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষा, মটর' },
+      { season: 'রবি (নভেম্বর-মার्च)', crops: 'গম, সরিষা, মটর' },
       { season: 'জায়েদ (মার্চ-জুন)', crops: 'তরমুজ, মুগ' }
     ],
     ta: [
@@ -275,67 +275,17 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const t = useMemo(() => UI_STRINGS[language.id] || UI_STRINGS.en, [language.id]);
 
-  useEffect(() => {
-    const welcomeText = GREETINGS[language.id] || GREETINGS.en;
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: welcomeText,
-        suggestions: [
-          t.diseaseLabel,
-          t.marketLabel,
-          t.weatherLabel,
-          t.guideLabel
-        ]
-      }
-    ]);
-
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
-        
-        const localeMap: Record<string, string> = {
-          en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
-        };
-        recognitionRef.current.lang = localeMap[language.id] || 'en-IN';
-
-        recognitionRef.current.onresult = (event: any) => {
-          const text = event.results[0][0].transcript;
-          setInput(text);
-          processResponse(text);
-        };
-
-        recognitionRef.current.onerror = () => setIsRecording(false);
-        recognitionRef.current.onend = () => setIsRecording(false);
-      }
-    }
-    
-    return () => {
-      if (recognitionRef.current) recognitionRef.current.abort();
-    };
-  }, [language.id, t.diseaseLabel, t.marketLabel, t.weatherLabel, t.guideLabel]);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, isProcessing]);
-
-  const playAudio = (base64Audio: string) => {
-    if (audioRef.current) audioRef.current.pause();
-    const audio = new Audio(base64Audio);
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-  };
-
   const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
     const newMsg = { ...msg, id: Math.random().toString(36).substr(2, 9) };
     setMessages(prev => [...prev, newMsg]);
     return newMsg.id;
+  }, []);
+
+  const playAudio = useCallback((base64Audio: string) => {
+    if (audioRef.current) audioRef.current.pause();
+    const audio = new Audio(base64Audio);
+    audioRef.current = audio;
+    audio.play().catch(() => {});
   }, []);
 
   const processResponse = useCallback(async (text: string, silentUserMsg: boolean = false, specialType?: 'market_data' | 'weather_data' | 'guide_data') => {
@@ -364,13 +314,85 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         suggestions: result.followUpQuestions
       });
 
-      if (result.responseAudio) playAudio(result.responseAudio);
+      if (result.responseAudio) {
+        playAudio(result.responseAudio);
+      }
     } catch (error) {
       addMessage({ role: 'assistant', content: t.error });
     } finally {
       setIsProcessing(false);
     }
-  }, [language.id, messages, t.error, isProcessing, addMessage]);
+  }, [language.id, messages, t.error, isProcessing, addMessage, playAudio]);
+
+  useEffect(() => {
+    // Initial welcome message with audio
+    const welcomeText = GREETINGS[language.id] || GREETINGS.en;
+    
+    const initApp = async () => {
+      setIsProcessing(true);
+      try {
+        const result = await voiceAssistedFarmingConsultation({
+          userInputText: welcomeText + " Just say hi.",
+          selectedLanguage: language.id as any,
+        });
+        
+        setMessages([
+          {
+            id: 'welcome',
+            role: 'assistant',
+            content: result.responseText,
+            suggestions: [
+              t.diseaseLabel,
+              t.marketLabel,
+              t.weatherLabel,
+              t.guideLabel
+            ]
+          }
+        ]);
+        
+        if (result.responseAudio) playAudio(result.responseAudio);
+      } catch (e) {
+        setMessages([{ id: 'welcome', role: 'assistant', content: welcomeText }]);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    initApp();
+
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        
+        const localeMap: Record<string, string> = {
+          en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
+        };
+        recognitionRef.current.lang = localeMap[language.id] || 'en-IN';
+
+        recognitionRef.current.onresult = (event: any) => {
+          const text = event.results[0][0].transcript;
+          setInput(text);
+          processResponse(text);
+        };
+
+        recognitionRef.current.onerror = () => setIsRecording(false);
+        recognitionRef.current.onend = () => setIsRecording(false);
+      }
+    }
+    
+    return () => {
+      if (recognitionRef.current) recognitionRef.current.abort();
+    };
+  }, [language.id, t.diseaseLabel, t.marketLabel, t.weatherLabel, t.guideLabel, playAudio]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isProcessing]);
 
   const handleAction = async (action: string) => {
     if (isProcessing) return;
@@ -421,7 +443,15 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           photoDataUri: dataUri,
           language: language.label
         });
+        
+        // Use the consultation flow to read the analysis result
+        const audioRes = await voiceAssistedFarmingConsultation({
+          userInputText: result.responseInSelectedLanguage + " Do you need help with treatments?",
+          selectedLanguage: language.id as any
+        });
+        
         addMessage({ role: 'assistant', content: result.responseInSelectedLanguage });
+        if (audioRes.responseAudio) playAudio(audioRes.responseAudio);
       } catch (error) {
         addMessage({ role: 'assistant', content: t.error });
       } finally {
