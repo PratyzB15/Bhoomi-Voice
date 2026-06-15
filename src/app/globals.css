@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 96 20% 96%;
+    --background: 96 30% 98%;
     --foreground: 140 33% 10%;
     --card: 0 0% 100%;
     --card-foreground: 140 33% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 140 33% 10%;
-    --primary: 140 33% 27%;
+    --primary: 140 40% 25%;
     --primary-foreground: 96 20% 98%;
-    --secondary: 140 10% 90%;
+    --secondary: 140 20% 92%;
     --secondary-foreground: 140 33% 20%;
-    --muted: 140 10% 92%;
-    --muted-foreground: 140 20% 40%;
-    --accent: 43 80% 46%;
+    --muted: 140 10% 94%;
+    --muted-foreground: 140 20% 45%;
+    --accent: 43 90% 45%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 140 20% 85%;
-    --input: 140 20% 85%;
-    --ring: 140 33% 27%;
-    --radius: 1.25rem;
+    --border: 140 20% 88%;
+    --input: 140 20% 88%;
+    --ring: 140 40% 25%;
+    --radius: 1.5rem;
   }
 }
 
@@ -40,50 +40,60 @@
 }
 
 @keyframes sway {
-  0%, 100% { transform: rotate(-3deg) translateY(0); }
-  50% { transform: rotate(3deg) translateY(-8px); }
+  0%, 100% { transform: rotate(-4deg) translateY(0); }
+  50% { transform: rotate(4deg) translateY(-10px); }
 }
 
 @keyframes sway-intense {
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(5deg); }
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
 }
 
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0) translateX(0); }
-  50% { transform: translateY(-15px) translateX(10px); }
+@keyframes float-nature {
+  0%, 100% { transform: translateY(0) translateX(0) rotate(0); }
+  33% { transform: translateY(-20px) translateX(15px) rotate(5deg); }
+  66% { transform: translateY(10px) translateX(-10px) rotate(-5deg); }
 }
 
-@keyframes drift {
-  from { transform: translateX(-10%) translateY(0); }
-  to { transform: translateX(10%) translateY(-20px); }
+@keyframes cloud-drift {
+  from { transform: translateX(-20%); }
+  to { transform: translateX(20%); }
 }
 
 .animate-sway {
-  animation: sway 8s ease-in-out infinite;
+  animation: sway 7s ease-in-out infinite;
   transform-origin: bottom center;
 }
 
 .animate-sway-intense {
-  animation: sway-intense 5s ease-in-out infinite;
+  animation: sway-intense 4s ease-in-out infinite;
   transform-origin: bottom center;
 }
 
 .animate-float-nature {
-  animation: float-slow 12s ease-in-out infinite;
+  animation: float-nature 15s ease-in-out infinite;
 }
 
 .nature-bg {
   background: 
-    radial-gradient(circle at 0% 0%, rgba(46, 91, 61, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(212, 160, 23, 0.08) 0%, transparent 50%),
-    linear-gradient(to bottom, #f0f4ef 0%, #ffffff 100%);
+    radial-gradient(circle at 10% 10%, rgba(46, 91, 61, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(212, 160, 23, 0.12) 0%, transparent 40%),
+    linear-gradient(to bottom, #f0f7f0 0%, #ffffff 100%);
 }
 
 .glass-morphism {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
+  @apply bg-white/90 backdrop-blur-lg border border-white/40 shadow-2xl;
 }
 
 .mobile-stage {
-  @apply max-w-[430px] w-full h-[90vh] mx-auto relative overflow-hidden rounded-[3rem] border-[8px] border-primary/10 bg-white shadow-2xl;
+  @apply max-w-[430px] w-full h-[92vh] mx-auto relative overflow-hidden rounded-[3.5rem] border-[12px] border-primary/10 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)];
+}
+
+/* Hide scrollbar but allow scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
