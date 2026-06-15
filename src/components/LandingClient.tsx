@@ -29,6 +29,16 @@ export function LandingClient() {
 
   const t = selectedLang ? TRANSLATIONS[selectedLang.id] : TRANSLATIONS.en;
 
+  const handleStart = () => {
+    // Crucial: Unlock Web Speech API on user gesture for mobile/Safari compatibility
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const unlocker = new SpeechSynthesisUtterance('');
+      unlocker.volume = 0;
+      window.speechSynthesis.speak(unlocker);
+    }
+    setIsStarted(true);
+  };
+
   if (isStarted && selectedLang) {
     return <BhoomiApp language={selectedLang} />;
   }
@@ -79,7 +89,7 @@ export function LandingClient() {
           <Button 
             className="w-full h-14 rounded-2xl text-lg group transition-all"
             disabled={!selectedLang}
-            onClick={() => setIsStarted(true)}
+            onClick={handleStart}
           >
             {t.start}
             <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />

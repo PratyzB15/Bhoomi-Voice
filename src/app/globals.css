@@ -51,13 +51,13 @@
 
 @keyframes float-nature {
   0%, 100% { transform: translateY(0) translateX(0) rotate(0); }
-  33% { transform: translateY(-20px) translateX(15px) rotate(5deg); }
-  66% { transform: translateY(10px) translateX(-10px) rotate(-5deg); }
+  33% { transform: translateY(-30px) translateX(20px) rotate(5deg); }
+  66% { transform: translateY(15px) translateX(-15px) rotate(-5deg); }
 }
 
 @keyframes cloud-drift {
-  from { transform: translateX(-20%); }
-  to { transform: translateX(20%); }
+  from { transform: translateX(-30%); opacity: 0.1; }
+  to { transform: translateX(30%); opacity: 0.3; }
 }
 
 .animate-sway {
@@ -71,22 +71,26 @@
 }
 
 .animate-float-nature {
-  animation: float-nature 15s ease-in-out infinite;
+  animation: float-nature 12s ease-in-out infinite;
+}
+
+.animate-cloud {
+  animation: cloud-drift 25s linear infinite alternate;
 }
 
 .nature-bg {
   background: 
-    radial-gradient(circle at 10% 10%, rgba(46, 91, 61, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 90% 90%, rgba(212, 160, 23, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 10% 10%, rgba(46, 91, 61, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 90% 90%, rgba(212, 160, 23, 0.15) 0%, transparent 45%),
     linear-gradient(to bottom, #f0f7f0 0%, #ffffff 100%);
 }
 
 .glass-morphism {
-  @apply bg-white/90 backdrop-blur-lg border border-white/40 shadow-2xl;
+  @apply bg-white/90 backdrop-blur-xl border border-white/40 shadow-2xl;
 }
 
 .mobile-stage {
-  @apply max-w-[430px] w-full h-[92vh] mx-auto relative overflow-hidden rounded-[3.5rem] border-[12px] border-primary/10 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)];
+  @apply max-w-[430px] w-full h-[92vh] mx-auto relative overflow-hidden rounded-[3.5rem] border-[12px] border-primary/20 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)];
 }
 
 /* Hide scrollbar but allow scrolling */

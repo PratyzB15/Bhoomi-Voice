@@ -18,7 +18,8 @@ import {
   Loader2,
   Square,
   Sprout,
-  Sun
+  Sun,
+  Cloud
 } from 'lucide-react';
 import { voiceAssistedFarmingConsultation } from '@/ai/flows/voice-assisted-farming-consultation';
 import { cropDiseaseImageAnalysis } from '@/ai/flows/crop-disease-image-analysis';
@@ -70,7 +71,7 @@ const UI_STRINGS: Record<string, any> = {
     weather: "Weather", 
     guide: "Guide", 
     placeholder: "Ask anything...", 
-    verified: "Verified", 
+    verified: "Verified Hub", 
     liveRates: "Live Rates",
     error: "I'm sorry, I encountered an error. Please try again.",
     analyzing: "Checking crop health...",
@@ -87,7 +88,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "Season",
     bestCrops: "Best Crops",
     trendLabel: "Market Trend",
-    greeting: "Hi, I am Bhoomi. How can I help u today?"
+    greeting: "Hi I am Bhoomi, how can i help u today?"
   },
   hi: { 
     appName: "भूमि वॉइस", 
@@ -96,7 +97,7 @@ const UI_STRINGS: Record<string, any> = {
     weather: "मौसम", 
     guide: "सहायता", 
     placeholder: "कुछ भी पूछें...", 
-    verified: "सत्यापित", 
+    verified: "सत्यापित केंद्र", 
     liveRates: "ताजा दर",
     error: "क्षमा करें, मुझे एक त्रुटि मिली। कृपया पुनः प्रयास करें।",
     analyzing: "फसल के स्वास्थ्य की जाँच हो रही है...",
@@ -113,7 +114,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "सीजन",
     bestCrops: "बेहतरीन फसलें",
     trendLabel: "बाजार का रुझान",
-    greeting: "नमस्ते, मैं भूमि हूँ। मैं आज आपकी क्या मदद कर सकता हूँ?"
+    greeting: "नमस्ते मैं भूमि हूँ, मैं आज आपकी क्या मदद कर सकता हूँ?"
   },
   bn: { 
     appName: "ভূমি ভয়েস", 
@@ -122,7 +123,7 @@ const UI_STRINGS: Record<string, any> = {
     weather: "আবহাওয়া", 
     guide: "গাইড", 
     placeholder: "কিছু জিজ্ঞাসা করুন...", 
-    verified: "যাচাইকৃত", 
+    verified: "যাচাইকৃত হাব", 
     liveRates: "লাইভ রেট",
     error: "দুঃখিত, আমি একটি কিছত্রুটির সম্মুখীন হয়েছি। দয়া করে আবার চেষ্টা করুন।",
     analyzing: "ফসলের স্বাস্থ্য পরীক্ষা করা হচ্ছে...",
@@ -139,7 +140,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "ঋতু",
     bestCrops: "সেরা ফসল",
     trendLabel: "বাজারের প্রবণতা",
-    greeting: "হাই, আমি ভূমি। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?"
+    greeting: "হাই আমি ভূমি, আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?"
   },
   ta: { 
     appName: "பூமி வாய்ஸ்", 
@@ -165,7 +166,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "பருவம்",
     bestCrops: "சிறந்த பயிர்கள்",
     trendLabel: "சந்தை போக்கு",
-    greeting: "வணக்கம், நான் பூமி. இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?"
+    greeting: "வணக்கம் நான் பூமி, இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?"
   },
   mr: { 
     appName: "भूमी व्हॉइस", 
@@ -191,7 +192,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "हवामान",
     bestCrops: "सर्वोत्तम पिके",
     trendLabel: "बाजार कल",
-    greeting: "नमस्कार, मी भूमी आहे. मी आज तुम्हाला कशी मदत करू शकतो?"
+    greeting: "नमस्कार मी भूमी आहे, मी आज तुम्हाला कशी मदत करू शकतो?"
   }
 };
 
@@ -280,9 +281,17 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       const langMap: Record<string, string> = {
         en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
       };
-      utterance.lang = langMap[language.id] || 'en-IN';
-      utterance.rate = 1.0; 
+      
+      const targetLang = langMap[language.id] || 'en-IN';
+      utterance.lang = targetLang;
+      utterance.rate = 0.95; // Slightly slower for clarity
       utterance.pitch = 1.0;
+      
+      // Select best voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const voice = voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
+      if (voice) utterance.voice = voice;
+      
       window.speechSynthesis.speak(utterance);
     }
   }, [language.id]);
@@ -325,13 +334,17 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
       if (result.responseAudio) {
         playAudio(result.responseAudio);
+      } else {
+        // Fallback to local synthesis if flow audio fails
+        speakLocal(result.responseText);
       }
     } catch (error) {
       addMessage({ role: 'assistant', content: t.error });
+      speakLocal(t.error);
     } finally {
       setIsProcessing(false);
     }
-  }, [language.id, messages, t.error, isProcessing, playAudio]);
+  }, [language.id, messages, t.error, isProcessing, playAudio, speakLocal]);
 
   const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
     const newMsg = { ...msg, id: Math.random().toString(36).substr(2, 9) };
@@ -350,8 +363,8 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       }
     ]);
     
-    // Trigger simple voice immediately
-    const timer = setTimeout(() => speakLocal(welcomeText), 300);
+    // Trigger localized greeting immediately using local voice (no AI needed for first Hi)
+    const timer = setTimeout(() => speakLocal(welcomeText), 100);
 
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -395,17 +408,17 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (isProcessing) return;
 
     if (action === t.diseaseLabel) {
-      await processResponse(`Assistant here. ${t.diseasePrompt}`, true);
+      await processResponse(`Assistant prompt: ${t.diseasePrompt}`, true);
     } else if (action === t.marketLabel) {
       const marketData = getLocalizedMarketData(language.id);
       const dataSummary = marketData.map(d => `${d.name} is ₹${d.price}`).join(", ");
-      await processResponse(`Mandi updates. ${dataSummary}. ${t.marketPrompt}`, true, 'market_data');
+      await processResponse(`Mandi report: ${dataSummary}. ${t.marketPrompt}`, true, 'market_data');
     } else if (action === t.weatherLabel) {
       const seasonData = getLocalizedSeasonData(language.id);
       const dataSummary = seasonData.map(d => `In ${d.season}, best crops are ${d.crops}`).join(". ");
-      await processResponse(`Weather overview. ${dataSummary}. ${t.weatherPrompt}`, true, 'weather_data');
+      await processResponse(`Weather update: ${dataSummary}. ${t.weatherPrompt}`, true, 'weather_data');
     } else if (action === t.guideLabel) {
-      await processResponse(`Here is how to use Bhoomi. ${t.guidePrompt}`, true, 'guide_data');
+      await processResponse(`User guide: ${t.guidePrompt}`, true, 'guide_data');
     } else {
       await processResponse(action);
     }
@@ -448,8 +461,10 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         
         addMessage({ role: 'assistant', content: result.responseInSelectedLanguage });
         if (audioRes.responseAudio) playAudio(audioRes.responseAudio);
+        else speakLocal(result.responseInSelectedLanguage);
       } catch (error) {
         addMessage({ role: 'assistant', content: t.error });
+        speakLocal(t.error);
       } finally {
         setIsProcessing(false);
       }
@@ -574,30 +589,30 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   return (
     <div className="mobile-stage flex flex-col bg-white nature-bg relative overflow-hidden">
-      {/* Background Animated Layer - Ensuring visibility */}
+      {/* Background Animated Layer */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-12 left-10 w-40 h-40 opacity-30 animate-float-nature text-blue-400/50">
-          <CloudSun className="w-full h-full" />
+        <div className="absolute top-12 left-10 w-48 h-48 opacity-30 animate-cloud text-blue-300">
+          <Cloud className="w-full h-full" />
         </div>
-        <div className="absolute top-1/4 right-10 w-24 h-24 opacity-25 animate-sway text-green-500/40">
+        <div className="absolute top-1/4 right-10 w-32 h-32 opacity-25 animate-float-nature text-green-500/40">
           <Leaf className="w-full h-full" />
         </div>
-        <div className="absolute top-1/2 left-4 w-16 h-16 opacity-15 animate-float-nature text-yellow-400/40" style={{ animationDelay: '3s' }}>
+        <div className="absolute top-1/2 left-4 w-20 h-20 opacity-20 animate-float-nature text-yellow-400/30" style={{ animationDelay: '3s' }}>
           <Sun className="w-full h-full" />
         </div>
         
         {/* Grass/Crop swaying at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 flex items-end justify-around px-4 opacity-40 z-0">
-          {[...Array(12)].map((_, i) => (
+        <div className="absolute bottom-0 left-0 right-0 h-56 flex items-end justify-around px-8 opacity-60 z-0">
+          {[...Array(14)].map((_, i) => (
             <div 
               key={i} 
-              className="w-8 h-32 animate-sway-intense text-primary/30" 
+              className="w-10 h-36 animate-sway-intense text-primary/40" 
               style={{ 
-                animationDelay: `${i * 0.4}s`, 
+                animationDelay: `${i * 0.3}s`, 
                 transformOrigin: 'bottom center'
               }}
             >
-              <Sprout className="w-full h-full stroke-[1]" />
+              <Sprout className="w-full h-full stroke-[1.5]" />
             </div>
           ))}
         </div>
@@ -639,15 +654,15 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         ))}
       </div>
 
-      <ScrollArea className="flex-1 p-4 bg-transparent w-full z-10 no-scrollbar">
+      <ScrollArea className="flex-1 p-5 bg-transparent w-full z-10 no-scrollbar">
         <div className="space-y-6 pb-12 w-full max-w-full">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
-                className={`max-w-[85%] rounded-3xl p-5 shadow-lg transition-all animate-in fade-in slide-in-from-bottom-3 relative z-20 overflow-hidden ${
+                className={`max-w-[88%] rounded-3xl p-5 shadow-lg transition-all animate-in fade-in slide-in-from-bottom-3 relative z-20 overflow-hidden ${
                   msg.role === 'user' 
                   ? 'bg-primary text-white rounded-tr-none ml-auto border border-primary/20' 
-                  : 'bg-white/95 backdrop-blur-md text-foreground rounded-tl-none border border-primary/10 mr-auto shadow-[0_10px_30px_rgba(0,0,0,0.06)]'
+                  : 'bg-white/95 backdrop-blur-xl text-foreground rounded-tl-none border border-primary/10 mr-auto shadow-[0_15px_40px_rgba(0,0,0,0.08)]'
                 } ${msg.type && msg.type !== 'text' ? 'w-full max-w-[95%]' : ''}`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
@@ -656,19 +671,19 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                 
                 {renderSpecialContent(msg)}
 
-                <div className="whitespace-pre-line w-full text-[15px] leading-relaxed">
+                <div className="whitespace-pre-line w-full text-[15px] leading-relaxed font-medium">
                   {msg.role === 'assistant' ? formatMessageContent(msg.content) : msg.content}
                 </div>
               </div>
               
               {msg.suggestions && msg.suggestions.length > 0 && !isProcessing && (
-                <div className="mt-4 flex flex-wrap gap-2 justify-start max-w-[95%] relative z-20">
+                <div className="mt-4 flex flex-wrap gap-2 justify-start max-w-[95%] relative z-20 px-2">
                   {msg.suggestions.map((suggestion, idx) => (
                     <Button 
                       key={idx} 
                       variant="outline" 
                       size="sm" 
-                      className="text-[11px] h-8 rounded-full bg-white/90 backdrop-blur-md border-primary/20 text-primary hover:bg-primary hover:text-white transition-all px-4 shadow-sm font-medium"
+                      className="text-[11px] h-8 rounded-full bg-white/95 backdrop-blur-md border-primary/20 text-primary hover:bg-primary hover:text-white transition-all px-4 shadow-sm font-bold"
                       onClick={() => handleAction(suggestion)}
                     >
                       {suggestion}
@@ -679,14 +694,14 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             </div>
           ))}
           {isProcessing && (
-            <div className="flex justify-start relative z-20">
-              <div className="bg-white/95 backdrop-blur-md border border-primary/10 rounded-2xl rounded-tl-none px-4 py-3 shadow-md flex items-center gap-3">
+            <div className="flex justify-start relative z-20 px-2">
+              <div className="bg-white/95 backdrop-blur-md border border-primary/10 rounded-2xl rounded-tl-none px-5 py-3 shadow-md flex items-center gap-3">
                 <Loader2 className="w-4 h-4 text-primary animate-spin" />
                 <span className="text-[11px] font-bold text-primary/70 animate-pulse tracking-wide uppercase">Bhoomi is thinking...</span>
               </div>
             </div>
           )}
-          <div ref={scrollRef} className="h-6" />
+          <div ref={scrollRef} className="h-10" />
         </div>
       </ScrollArea>
 
@@ -726,9 +741,8 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           </Button>
         </div>
         
-        <div className="flex justify-between items-center px-1">
-          {/* Fixed Hydration Error: div inside p replaced with div */}
-          <div className="text-[11px] text-primary/60 font-bold flex items-center gap-2">
+        <div className="flex justify-between items-center px-2">
+          <div className="text-[11px] text-primary/70 font-bold flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> {t.verified}
           </div>
           <button className="text-[11px] text-primary font-bold hover:underline tracking-wide uppercase" onClick={() => handleAction(t.marketLabel)} disabled={isProcessing}>
