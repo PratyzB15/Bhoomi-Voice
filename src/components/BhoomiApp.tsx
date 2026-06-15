@@ -116,20 +116,20 @@ const UI_STRINGS: Record<string, any> = {
   },
   bn: { 
     appName: "ভূমি ভয়েস", 
-    disease: "রোগ", 
+    disease: "रोग", 
     market: "বাজার", 
     weather: "আবহাওয়া", 
     guide: "গাইড", 
     placeholder: "কিছু জিজ্ঞাসা করুন...", 
     verified: "যাচাইকৃত", 
     liveRates: "লাইভ রেট",
-    error: "দুঃখিত, আমি একটি কিছত্রुটির সম্মুখীন হয়েছি। দয়া করে फिर से চেষ্টা করুন।",
-    analyzing: "ফসলের স্বাস্থ্য পরীক্ষা করা হচ্ছে...",
-    diseaseLabel: "রোগ শনাক্তকরণ",
+    error: "দুঃখিত, আমি একটি কিছত্রुটির সম্মুখীন হয়েছি। দয়া করে फिर से कोशिश করুন।",
+    analyzing: "ফসলের স্বাস্থ্য परीक्षा করা হচ্ছে...",
+    diseaseLabel: "रोग শনাক্তকরণ",
     marketLabel: "বাজার দর",
     weatherLabel: "আবহাওয়ার পূর্বাভাস",
     guideLabel: "সাহায্য নির্দেশিকা",
-    diseasePrompt: "আপনি কোন উদ্ভিদ বা ফসলের রোগ সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয়, তবে দয়া করে পেপারক্লিপ আইকন ব্যবহার করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন যাতে আমি আপনাকে সাহায্য করতে পারি। আমি আপনাকে পোকামাকড় এবং কীট থেকে ফসল রক্ষা করতেও সাহায্য করতে পারি।",
+    diseasePrompt: "আপনি কোন উদ্ভিদ বা ফসলের रोग সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয়, তবে দয়া করে পেপারক্লিপ আইকন ব্যবহার করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন যাতে আমি আপনাকে সাহায্য করতে পারি। আমি আপনাকে পোকামাকড় এবং কীট থেকে ফসল রক্ষা করতেও সাহায্য করতে পারি।",
     marketPrompt: "বর্তমান মান্ডি রেটগুলি নীচে দেওয়া হয়েছে। আপনি কোন ফসলের বাজার দর জানতে চান?",
     weatherPrompt: "ভালো ফসলের জন্য আবহাওয়া অত্যন্ত গুরুত্বপূর্ণ। প্রতিটি ঋতুতে কোন ফসল সবচেয়ে ভালো জন্মায় তার একটি নির্দেশিকা এখানে দেওয়া হলো। আপনি কি জানতে চান আজকের আবহাওয়া চাষের জন্য উপযুক্ত কি না, নাকি আপনার মনে অন্য কোনো নির্দিষ্ট ফসল আছে? আমি আপনাকে সেরা আবহাওয়ার পরামর্শ দেব।",
     guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে কথা বলতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাওয়ার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
@@ -272,8 +272,25 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const t = useMemo(() => UI_STRINGS[language.id] || UI_STRINGS.en, [language.id]);
 
+  const speakLocal = useCallback((text: string) => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const langMap: Record<string, string> = {
+        en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
+      };
+      utterance.lang = langMap[language.id] || 'en-IN';
+      utterance.rate = 0.9; // Slightly slower for better clarity
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [language.id]);
+
   const playAudio = useCallback((base64Audio: string) => {
-    if (audioRef.current) audioRef.current.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     const audio = new Audio(base64Audio);
     audioRef.current = audio;
     audio.play().catch(() => {});
@@ -334,8 +351,8 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   }, []);
 
   useEffect(() => {
-    const initApp = async () => {
-      // Hardcoded greeting as requested, skipping LLM connection for content
+    const initApp = () => {
+      // 1. Set the localized greeting instantly without AI
       const welcomeText = t.greeting;
       setMessages([
         {
@@ -346,8 +363,8 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         }
       ]);
       
-      // Still trigger TTS for the localized greeting so it's read out
-      triggerAudioOnly(welcomeText);
+      // 2. Speak it out immediately using browser's local TTS (no AI needed)
+      speakLocal(welcomeText);
     };
 
     initApp();
@@ -377,8 +394,11 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     
     return () => {
       if (recognitionRef.current) recognitionRef.current.abort();
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
     };
-  }, [language.id, triggerAudioOnly, t.greeting]);
+  }, [language.id, t.greeting, speakLocal]);
 
   useEffect(() => {
     if (scrollRef.current) {

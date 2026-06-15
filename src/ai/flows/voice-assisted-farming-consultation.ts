@@ -113,14 +113,14 @@ Current conversation history:
 User's query: {{{userInputText}}}`,
 });
 
-// Define the Genkit flow
+// Define the Genkit flow with robust retry for 429 errors
 export async function voiceAssistedFarmingConsultation(
   input: VoiceAssistedFarmingConsultationInput
 ): Promise<VoiceAssistedFarmingConsultationOutput> {
-  // 1. Generate text response using the LLM with retry for UNAVAILABLE errors
+  // 1. Generate text response using the LLM with exponential backoff for rate limits
   let output;
   let attempts = 0;
-  const maxAttempts = 3;
+  const maxAttempts = 4;
 
   while (attempts < maxAttempts) {
     try {
@@ -130,7 +130,9 @@ export async function voiceAssistedFarmingConsultation(
     } catch (e: any) {
       attempts++;
       if (attempts >= maxAttempts) throw e;
-      await new Promise(resolve => setTimeout(resolve, 800 * attempts));
+      // Exponential backoff: 2s, 4s, 8s...
+      const delay = Math.pow(2, attempts) * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
