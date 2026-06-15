@@ -17,7 +17,8 @@ import {
   Volume2,
   Loader2,
   Square,
-  Sprout
+  Sprout,
+  Sun
 } from 'lucide-react';
 import { voiceAssistedFarmingConsultation } from '@/ai/flows/voice-assisted-farming-consultation';
 import { cropDiseaseImageAnalysis } from '@/ai/flows/crop-disease-image-analysis';
@@ -123,16 +124,16 @@ const UI_STRINGS: Record<string, any> = {
     placeholder: "কিছু জিজ্ঞাসা করুন...", 
     verified: "যাচাইকৃত", 
     liveRates: "লাইভ রেট",
-    error: "দুঃখিত, আমি একটি কিছত্রुটির সম্মুখীন হয়েছি। দয়া করে फिर से कोशिश করুন।",
-    analyzing: "ফসলের স্বাস্থ্য परीक्षा করা হচ্ছে...",
+    error: "দুঃখিত, আমি একটি কিছত্রুটির সম্মুখীন হয়েছি। দয়া করে আবার চেষ্টা করুন।",
+    analyzing: "ফসলের স্বাস্থ্য পরীক্ষা করা হচ্ছে...",
     diseaseLabel: "রোগ শনাক্তকরণ",
     marketLabel: "বাজার দর",
     weatherLabel: "আবহাওয়ার পূর্বাভাস",
     guideLabel: "সাহায্য নির্দেশিকা",
-    diseasePrompt: "আপনি কোন উদ্ভিদ বা ফসলের रोग সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয়, তবে দয়া করে পেপারক্লিপ আইকন ব্যবহার করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন যাতে আমি আপনাকে সাহায্য করতে পারি। আমি আপনাকে পোকামাকড় এবং কীট থেকে ফসল রক্ষা করতেও সাহায্য করতে পারি।",
+    diseasePrompt: "আপনি কোন উদ্ভিদ বা ফসলের রোগ সম্পর্কে জানতে চান? যদি আপনার ফসল কোন রোগের সম্মুখীন হয়, তবে দয়া করে পেপারক্লিপ আইকন ব্যবহার করে একটি ছবি আপলোড করুন বা সমস্যাটি বর্ণনা করুন যাতে আমি আপনাকে সাহায্য করতে পারি। আমি আপনাকে পোকামাকড় এবং কীট থেকে ফসল রক্ষা করতেও সাহায্য করতে পারি।",
     marketPrompt: "বর্তমান মান্ডি রেটগুলি নীচে দেওয়া হয়েছে। আপনি কোন ফসলের বাজার দর জানতে চান?",
     weatherPrompt: "ভালো ফসলের জন্য আবহাওয়া অত্যন্ত গুরুত্বপূর্ণ। প্রতিটি ঋতুতে কোন ফসল সবচেয়ে ভালো জন্মায় তার একটি নির্দেশিকা এখানে দেওয়া হলো। আপনি কি জানতে চান আজকের আবহাওয়া চাষের জন্য উপযুক্ত কি না, নাকি আপনার মনে অন্য কোনো নির্দিষ্ট ফসল আছে? আমি আপনাকে সেরা আবহাওয়ার পরামর্শ দেব।",
-    guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে बात করতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাওয়ার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
+    guidePrompt: "ভূমি ভয়েস আপনার ব্যক্তিগত চাষের সহকারী। আপনি মাইক বাটনে ক্লিক করে আমার সাথে কথা বলতে পারেন, অথবা আপনার প্রশ্ন টাইপ করতে পারেন। তাৎক্ষণিক রোগ নির্ণয়ের জন্য পেপারক্লিপ ব্যবহার করে অসুস্থ ফসলের ছবি আপলোড করুন। দ্রুত বাজার এবং আবহাওয়ার আপডেটের জন্য উপরের বোতামগুলি ব্যবহার করুন। আমি আমার সব উত্তর আপনাকে পড়ে শোনাব!",
     cropHeader: "ফসল",
     priceHeader: "দাম (টাকা/কুইন্টাল)",
     seasonHeader: "ঋতু",
@@ -158,7 +159,7 @@ const UI_STRINGS: Record<string, any> = {
     diseasePrompt: "எந்த தாவர அல்லது பயிர் நோய் பற்றி நீங்கள் தெரிந்து கொள்ள விரும்புகிறீர்கள்? உங்கள் பயிர் ஏதேனும் நோயால் பாதிக்கப்பட்டிருந்தால், தயவுசெய்து பேப்பர்க்ளிப் ஐகானைப் பயன்படுத்தி ஒரு புகைப்படத்தைப் பதிவேற்றவும் அல்லது சிக்கலை விவரிக்கவும், அதனால் நான் உங்களுக்கு உதவ முடியும். பூச்சிகள் மற்றும் கிருமிகளிடமிருந்து பயிரைப் பாதுகாக்கவும் நான் உங்களுக்கு உதவ முடியும்.",
     marketPrompt: "தற்போதைய மண்டி விலைகள் கீழே பட்டியலிடப்பட்டுள்ளன. எந்த பயிர் சந்தை விலையை நீங்கள் தெரிந்து கொள்ள விரும்புகிறீர்கள்?",
     weatherPrompt: "நல்ல அறுவடைக்கு வானிலை மிகவும் முக்கியமானது. ஒவ்வொரு பருவத்திலும் எந்த பயிர்கள் சிறப்பாக வளரும் என்பதற்கான வழிகாட்டி இங்கே உள்ளது. இன்றைய வானிலை நடவு செய்ய ஏற்றதா என்பதை அறிய விரும்புகிறீர்களா அல்லது உங்கள் மனதில் ஏதேனும் குறிப்பிட்ட பயிர் உள்ளதா? நான் சிறந்த வானிலையை பரிந்துரைப்பேன்.",
-    guidePrompt: "பூமி வாய்ஸ் உங்கள் தனிப்பட்ட விவசாய உதவியாளர். மைக் பட்டனை கிளிக் செய்வதன் மூலம் நீங்கள் என்னுடன் பேசலாம் அல்லது உங்கள் கேள்விகளைத் தட்டச்சு செய்யலாம். பயிர் நோய்களைக் கண்டறிய புகைப்படங்களைப் பதிவேற்ற பேப்பர்க்ளிப்பைப் பயன்படுத்தவும். விரைவான சந்தை மற்றும் வானிலை அறிவிப்புகளுக்கு மேலே உள்ள பொத்தான்களைப் इस्तेमालவும். எனது பதில்கள் அனைத்தையும் நான் உங்களுக்குப் பேசிக் காட்டுவேன்!",
+    guidePrompt: "பூமி வாய்ஸ் உங்கள் தனிப்பட்ட விவசாய உதவியாளர். மைக் பட்டனை கிளிக் செய்வதன் மூலம் நீங்கள் என்னுடன் பேசலாம் அல்லது உங்கள் கேள்விகளைத் தட்டச்சு செய்யலாம். பயிர் நோய்களைக் கண்டறிய புகைப்படங்களைப் பதிவேற்ற பேப்பர்க்ளிப்பைப் பயன்படுத்தவும். விரைவான சந்தை மற்றும் வானிலை அறிவிப்புகளுக்கு மேலே உள்ள பொத்தான்களைப் பயன்படுத்தவும். எனது பதில்கள் அனைத்தையும் நான் உங்களுக்குப் பேசிக் காட்டுவேன்!",
     cropHeader: "பயிர்",
     priceHeader: "விலை (₹/குவிண்டால்)",
     seasonHeader: "பருவம்",
@@ -182,7 +183,7 @@ const UI_STRINGS: Record<string, any> = {
     weatherLabel: "हवामान अंदाज",
     guideLabel: "मदत मार्गदर्शक",
     diseasePrompt: "तुम्हाला कोणत्या झाडाच्या किंवा पिकाच्या रोगाबद्दल जाणून घ्यायचे आहे? जर तुमच्या पिकावर कोणताही रोग पडला असेल तर कृपया पेपरक्लिप आयकॉन वापरून फोटो अपलोड करा या समस्येचे वर्णन करा जेणेकरून मी आपको मदत करू शकेन. मी कीड और कीटकांपासून संरक्षण कसे करावे यातही मदत करू शकतो.",
-    marketPrompt: "सध्याचे मंडी दर खाली सूचीबद्ध आहेत। तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचे आहे?",
+    marketPrompt: "सध्याचे मंडी दर खाली सूचीबद्ध आहेत. तुम्हाला कोणत्या पिकाचा बाजार भाव जाणून घ्यायचे आहे?",
     weatherPrompt: "चांगल्या कापणीसाठी हवामान अत्यंत महत्त्वाचे आहे. प्रत्येक हंगामात कोणती पिके उत्तम येतात याची माहिती येथे आहे. तुम्हाला आजचे हवामान पेरणीसाठी योग्य आहे का हे जाणून घ्यायचे आहे का, की तुमच्या मनात एखादे विशिष्ट पीक आहे? मी तुम्हाला सर्वोत्तम हवामानाचा सल्ला देईन.",
     guidePrompt: "भूमी व्हॉइस आपला वैयक्तिक शेती सहाय्यक आहे. आपण माइक बटणावर क्लिक करून माझ्याशी बोलू शकता किंवा आपले प्रश्न टाइप करू शकता. पिकांच्या रोगाचे त्वरित निदान करण्यासाठी पेपरक्लिप वापरून फोटो अपलोड करा. बाजार और हवामानाच्या अपडेट्ससाठी वरील बटणे वापरा. मी माझी सर्व उत्तरे तुम्हाला बोलून दाखवेन!",
     cropHeader: "पीक",
@@ -274,14 +275,13 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const speakLocal = useCallback((text: string) => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-      // Cancel any ongoing speech to ensure current one is heard
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       const langMap: Record<string, string> = {
         en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
       };
       utterance.lang = langMap[language.id] || 'en-IN';
-      utterance.rate = 0.95; 
+      utterance.rate = 1.0; 
       utterance.pitch = 1.0;
       window.speechSynthesis.speak(utterance);
     }
@@ -339,7 +339,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     return newMsg.id;
   }, []);
 
-  // Initial welcome message and speech trigger
   useEffect(() => {
     const welcomeText = t.greeting;
     setMessages([
@@ -351,8 +350,8 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       }
     ]);
     
-    // Immediate voice playback with a tiny delay to ensure synthesis is ready
-    const timer = setTimeout(() => speakLocal(welcomeText), 600);
+    // Trigger simple voice immediately
+    const timer = setTimeout(() => speakLocal(welcomeText), 300);
 
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -562,10 +561,10 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             <span className="font-bold text-sm">How to use Bhoomi</span>
           </div>
           <div className="space-y-3 text-xs leading-relaxed text-foreground/80">
-            <p className="flex gap-2"><b>•</b> <span><b>Voice Chat:</b> Tap the Mic button and speak in your local language.</span></p>
-            <p className="flex gap-2"><b>•</b> <span><b>Photo Upload:</b> Use the Paperclip icon to send photos of sick crops for identification.</span></p>
-            <p className="flex gap-2"><b>•</b> <span><b>Fast Actions:</b> Use the top buttons for instant Market, Weather, and Disease help.</span></p>
-            <p className="flex gap-2"><b>•</b> <span><b>Smart Suggestions:</b> Tap the bubbles below my messages for follow-up questions.</span></p>
+            <div className="flex gap-2"><b>•</b> <span><b>Voice Chat:</b> Tap the Mic button and speak in your local language.</span></div>
+            <div className="flex gap-2"><b>•</b> <span><b>Photo Upload:</b> Use the Paperclip icon to send photos of sick crops.</span></div>
+            <div className="flex gap-2"><b>•</b> <span><b>Fast Actions:</b> Use the top buttons for instant Market and Weather help.</span></div>
+            <div className="flex gap-2"><b>•</b> <span><b>Smart Suggestions:</b> Tap the bubbles below my messages for follow-up questions.</span></div>
           </div>
         </div>
       );
@@ -575,26 +574,30 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   return (
     <div className="mobile-stage flex flex-col bg-white nature-bg relative overflow-hidden">
-      {/* Background Animated Layer */}
+      {/* Background Animated Layer - Ensuring visibility */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-12 left-10 w-40 h-40 opacity-20 animate-float-nature text-blue-500">
+        <div className="absolute top-12 left-10 w-40 h-40 opacity-30 animate-float-nature text-blue-400/50">
           <CloudSun className="w-full h-full" />
         </div>
-        <div className="absolute top-1/3 right-8 w-24 h-24 opacity-20 animate-sway text-green-600">
+        <div className="absolute top-1/4 right-10 w-24 h-24 opacity-25 animate-sway text-green-500/40">
           <Leaf className="w-full h-full" />
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-48 flex items-end justify-around px-10 opacity-30 z-0">
-          {[...Array(10)].map((_, i) => (
+        <div className="absolute top-1/2 left-4 w-16 h-16 opacity-15 animate-float-nature text-yellow-400/40" style={{ animationDelay: '3s' }}>
+          <Sun className="w-full h-full" />
+        </div>
+        
+        {/* Grass/Crop swaying at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 flex items-end justify-around px-4 opacity-40 z-0">
+          {[...Array(12)].map((_, i) => (
             <div 
               key={i} 
-              className="w-12 h-36 animate-sway-intense text-primary" 
+              className="w-8 h-32 animate-sway-intense text-primary/30" 
               style={{ 
-                animationDelay: `${i * 0.5}s`, 
-                transformOrigin: 'bottom center',
-                opacity: 0.2 + (i % 4) * 0.15
+                animationDelay: `${i * 0.4}s`, 
+                transformOrigin: 'bottom center'
               }}
             >
-              <Sprout className="w-full h-full stroke-[1.5]" />
+              <Sprout className="w-full h-full stroke-[1]" />
             </div>
           ))}
         </div>
@@ -620,7 +623,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-4 gap-3 bg-white/50 backdrop-blur-md border-b shrink-0 z-20">
+      <div className="p-4 grid grid-cols-4 gap-3 bg-white/60 backdrop-blur-md border-b shrink-0 z-20">
         {[
           { icon: Leaf, label: t.disease, action: t.diseaseLabel, color: 'bg-green-100 text-green-700' },
           { icon: BarChart3, label: t.market, action: t.marketLabel, color: 'bg-amber-100 text-amber-700' },
@@ -628,7 +631,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           { icon: HelpCircle, label: t.guide, action: t.guideLabel, color: 'bg-purple-100 text-purple-700' }
         ].map((item, idx) => (
           <button key={idx} onClick={() => handleAction(item.action)} className="flex flex-col items-center gap-1.5 group" disabled={isProcessing}>
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center group-active:scale-90 transition-all shadow-sm ${item.color}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center group-active:scale-95 transition-all shadow-sm ${item.color}`}>
               <item.icon className="w-6 h-6" />
             </div>
             <span className="text-[10px] font-bold text-center leading-tight">{item.label}</span>
@@ -637,14 +640,14 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       </div>
 
       <ScrollArea className="flex-1 p-4 bg-transparent w-full z-10 no-scrollbar">
-        <div className="space-y-6 pb-8 w-full max-w-full">
+        <div className="space-y-6 pb-12 w-full max-w-full">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
                 className={`max-w-[85%] rounded-3xl p-5 shadow-lg transition-all animate-in fade-in slide-in-from-bottom-3 relative z-20 overflow-hidden ${
                   msg.role === 'user' 
                   ? 'bg-primary text-white rounded-tr-none ml-auto border border-primary/20' 
-                  : 'bg-white/95 backdrop-blur-md text-foreground rounded-tl-none border border-primary/10 mr-auto shadow-[0_10px_30px_rgba(0,0,0,0.08)]'
+                  : 'bg-white/95 backdrop-blur-md text-foreground rounded-tl-none border border-primary/10 mr-auto shadow-[0_10px_30px_rgba(0,0,0,0.06)]'
                 } ${msg.type && msg.type !== 'text' ? 'w-full max-w-[95%]' : ''}`}
               >
                 {msg.type === 'image' && msg.imageUrl && (
@@ -687,7 +690,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
       </ScrollArea>
 
-      <div className="p-4 bg-white/80 backdrop-blur-xl border-t space-y-4 shrink-0 z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+      <div className="p-4 bg-white/90 backdrop-blur-xl border-t space-y-4 shrink-0 z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
             <Input 
@@ -724,9 +727,10 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
         </div>
         
         <div className="flex justify-between items-center px-1">
-          <p className="text-[11px] text-primary/60 font-bold flex items-center gap-2">
+          {/* Fixed Hydration Error: div inside p replaced with div */}
+          <div className="text-[11px] text-primary/60 font-bold flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> {t.verified}
-          </p>
+          </div>
           <button className="text-[11px] text-primary font-bold hover:underline tracking-wide uppercase" onClick={() => handleAction(t.marketLabel)} disabled={isProcessing}>
             {t.liveRates}
           </button>
