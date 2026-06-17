@@ -9,7 +9,7 @@ Tech Stack
 Prompt Design
 • Focused Responses: Strict instructions to provide information ONLY about the specific crop mentioned in the query
 • Structured Formatting: ALL CAPS subheadings on new lines with "•" bullet points, each on separate lines
-• Knowledge Base: Pre-fed market rates, seasonal guidance, disease remedies (Neem oil, Jivamrut) for Indian farming
+• Knowledge Base: Pre-fed market rates, seasonal guidance, disease remedies for Indian farming
 • Language Enforcement: Forces AI to respond exclusively in the user's selected language (en/hi/bn/ta/mr)
 • Fallback System: Comprehensive fallback responses in all 5 languages when API fails or quota exhausted
 
