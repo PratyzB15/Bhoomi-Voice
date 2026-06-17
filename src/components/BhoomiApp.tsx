@@ -19,7 +19,9 @@ import {
   Square,
   Sprout,
   Sun,
-  Cloud
+  Cloud,
+  Droplets,
+  Wind
 } from 'lucide-react';
 import { voiceAssistedFarmingConsultation } from '@/ai/flows/voice-assisted-farming-consultation';
 import { cropDiseaseImageAnalysis } from '@/ai/flows/crop-disease-image-analysis';
@@ -84,11 +86,11 @@ const UI_STRINGS: Record<string, any> = {
     weatherPrompt: "Weather is vital for a good harvest. Here is a guide on which crops grow best in each season. Would you like to know if today's weather is suitable for planting, or do you have a specific crop in mind? I will suggest the best weather.",
     guidePrompt: "Bhoomi Voice is your personal farming assistant. You can speak to me by clicking the Mic button, or type your questions below. Click the Paperclip to upload photos of sick crops for instant diagnosis. Use the buttons above for quick Market and Weather updates. I will speak all my answers back to you!",
     cropHeader: "Crop",
-    priceHeader: "Price (₹/Qtl)",
+    priceHeader: "Price (₹/Quintal)",
     seasonHeader: "Season",
     bestCrops: "Best Crops",
     trendLabel: "Market Trend",
-    greeting: "Hi I am Bhoomi, how can i help u today?"
+    greeting: "Hi! I am Bhoomi, your farming companion. How can I help you today?"
   },
   hi: { 
     appName: "भूमि वॉइस", 
@@ -114,7 +116,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "सीजन",
     bestCrops: "बेहतरीन फसलें",
     trendLabel: "बाजार का रुझान",
-    greeting: "नमस्ते मैं भूमि हूँ, मैं आज आपकी क्या मदद कर सकता हूँ?"
+    greeting: "नमस्ते! मैं भूमि हूँ, आपकी खेती साथी। आज मैं आपकी क्या मदद कर सकता हूँ?"
   },
   bn: { 
     appName: "ভূমি ভয়েস", 
@@ -140,7 +142,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "ঋতু",
     bestCrops: "সেরা ফসল",
     trendLabel: "বাজারের প্রবণতা",
-    greeting: "হাই আমি ভূমি, আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?"
+    greeting: "হাই! আমি ভূমি, আপনার চাষের সঙ্গী। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?"
   },
   ta: { 
     appName: "பூமி வாய்ஸ்", 
@@ -166,7 +168,7 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "பருவம்",
     bestCrops: "சிறந்த பயிர்கள்",
     trendLabel: "சந்தை போக்கு",
-    greeting: "வணக்கம் நான் பூமி, இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?"
+    greeting: "வணக்கம்! நான் பூமி, உங்கள் விவசாய துணை. இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?"
   },
   mr: { 
     appName: "भूमी व्हॉइस", 
@@ -192,70 +194,119 @@ const UI_STRINGS: Record<string, any> = {
     seasonHeader: "हवामान",
     bestCrops: "सर्वोत्तम पिके",
     trendLabel: "बाजार कल",
-    greeting: "नमस्कार मी भूमी आहे, मी आज तुम्हाला कशी मदत करू शकतो?"
+    greeting: "नमस्कार! मी भूमी आहे, आपला शेती साथीदार. आज मी आपली कशी मदत करू शकते?"
   }
 };
 
-const getLocalizedMarketData = (lang: string) => {
-  const data: Record<string, any[]> = {
-    en: [
-      { name: 'Rice', price: 2180 }, { name: 'Wheat', price: 2275 },
-      { name: 'Cotton', price: 6800 }, { name: 'Maize', price: 1950 },
-      { name: 'Mustard', price: 5450 }
-    ],
-    hi: [
-      { name: 'चावल', price: 2180 }, { name: 'गेहूं', price: 2275 },
-      { name: 'कपास', price: 6800 }, { name: 'मक्का', price: 1950 },
-      { name: 'सरसों', price: 5450 }
-    ],
-    bn: [
-      { name: 'চাল', price: 2180 }, { name: 'গম', price: 2275 },
-      { name: 'তুলা', price: 6800 }, { name: 'ভুট্টা', price: 1950 },
-      { name: 'সরিষা', price: 5450 }
-    ],
-    ta: [
-      { name: 'அரிசி', price: 2180 }, { name: 'கோதுமை', price: 2275 },
-      { name: 'பருத்தி', price: 6800 }, { name: 'சோளம்', price: 1950 },
-      { name: 'கடுகு', price: 5450 }
-    ],
-    mr: [
-      { name: 'तांदूळ', price: 2180 }, { name: 'गहू', price: 2275 },
-      { name: 'कापूस', price: 6800 }, { name: 'मका', price: 1950 },
-      { name: 'मोहरी', price: 5450 }
-    ]
+// Dynamic market data based on current date
+const getDynamicMarketData = (lang: string) => {
+  const currentDate = new Date();
+  const month = currentDate.getMonth(); // 0-11
+  
+  // Seasonal price variation factors
+  let riceFactor = 1.0;
+  let wheatFactor = 1.0;
+  let cottonFactor = 1.0;
+  let maizeFactor = 1.0;
+  let mustardFactor = 1.0;
+  
+  // Rice: Higher during lean season (May-July), lower during harvest (Oct-Dec)
+  if (month >= 4 && month <= 6) riceFactor = 1.12;
+  else if (month >= 9 && month <= 11) riceFactor = 0.92;
+  else riceFactor = 1.0;
+  
+  // Wheat: Higher before harvest (Feb-Apr), lower after harvest (May-July)
+  if (month >= 1 && month <= 3) wheatFactor = 1.10;
+  else if (month >= 4 && month <= 6) wheatFactor = 0.90;
+  else wheatFactor = 1.0;
+  
+  // Cotton: Higher during peak demand (Aug-Oct)
+  if (month >= 7 && month <= 9) cottonFactor = 1.15;
+  else cottonFactor = 1.0;
+  
+  // Maize: Stable with slight variations
+  if (month >= 5 && month <= 7) maizeFactor = 1.08;
+  else maizeFactor = 1.0;
+  
+  // Mustard: Higher during winter demand (Nov-Jan)
+  if (month >= 10 || month <= 0) mustardFactor = 1.12;
+  else if (month >= 3 && month <= 5) mustardFactor = 0.94;
+  else mustardFactor = 1.0;
+  
+  // Base prices
+  const basePrices = {
+    en: { Rice: 2180, Wheat: 2275, Cotton: 6800, Maize: 1950, Mustard: 5450 },
+    hi: { चावल: 2180, गेहूं: 2275, कपास: 6800, मक्का: 1950, सरसों: 5450 },
+    bn: { চাল: 2180, গম: 2275, তুলা: 6800, ভুট্টা: 1950, সরিষা: 5450 },
+    ta: { அரிசி: 2180, கோதுமை: 2275, பருத்தி: 6800, சோளம்: 1950, கடுகு: 5450 },
+    mr: { तांदूळ: 2180, गहू: 2275, कापूस: 6800, मका: 1950, मोहरी: 5450 }
   };
-  return data[lang] || data.en;
+  
+  const names = {
+    en: ['Rice', 'Wheat', 'Cotton', 'Maize', 'Mustard'],
+    hi: ['चावल', 'गेहूं', 'कपास', 'मक्का', 'सरसों'],
+    bn: ['চাল', 'গম', 'তুলা', 'ভুট্টা', 'সরিষা'],
+    ta: ['அரிசி', 'கோதுமை', 'பருத்தி', 'சோளம்', 'கடுகு'],
+    mr: ['तांदूळ', 'गहू', 'कापूस', 'मका', 'मोहरी']
+  };
+  
+  const factors = [riceFactor, wheatFactor, cottonFactor, maizeFactor, mustardFactor];
+  const currentPrices = basePrices[lang as keyof typeof basePrices] || basePrices.en;
+  
+  return names[lang as keyof typeof names]?.map((name, idx) => ({
+    name: name,
+    price: Math.round(Object.values(currentPrices)[idx] * factors[idx]),
+    originalPrice: Object.values(currentPrices)[idx],
+    trend: factors[idx] > 1 ? 'up' : factors[idx] < 1 ? 'down' : 'stable'
+  })) || names.en.map((name, idx) => ({
+    name: name,
+    price: Math.round(Object.values(basePrices.en)[idx] * factors[idx]),
+    originalPrice: Object.values(basePrices.en)[idx],
+    trend: factors[idx] > 1 ? 'up' : factors[idx] < 1 ? 'down' : 'stable'
+  }));
 };
 
-const getLocalizedSeasonData = (lang: string) => {
-  const data: Record<string, any[]> = {
+// Dynamic season data based on current date
+const getDynamicSeasonData = (lang: string) => {
+  const currentDate = new Date();
+  const month = currentDate.getMonth();
+  
+  const seasons = {
     en: [
-      { season: 'Kharif (Jun-Oct)', crops: 'Rice, Maize, Cotton' },
-      { season: 'Rabi (Nov-Mar)', crops: 'Wheat, Mustard, Peas' },
-      { season: 'Zaid (Mar-Jun)', crops: 'Watermelon, Moong' }
+      { season: 'Kharif (Jun-Oct)', crops: 'Rice, Maize, Cotton, Soybean', isActive: month >= 5 && month <= 9 },
+      { season: 'Rabi (Nov-Mar)', crops: 'Wheat, Mustard, Peas, Gram', isActive: month >= 10 || month <= 2 },
+      { season: 'Zaid (Mar-Jun)', crops: 'Watermelon, Moong, Cucumber', isActive: month >= 2 && month <= 5 }
     ],
     hi: [
-      { season: 'खरीफ (जून-अक्टूबर)', crops: 'चावल, मक्का, कपास' },
-      { season: 'रबी (नवंबर-मार्च)', crops: 'गेहूं, सरसों, मटर' },
-      { season: 'जायद (मार्च-जून)', crops: 'तरबूज, मूंग' }
+      { season: 'खरीफ (जून-अक्टूबर)', crops: 'धान, मक्का, कपास, सोयाबीन', isActive: month >= 5 && month <= 9 },
+      { season: 'रबी (नवंबर-मार्च)', crops: 'गेहूं, सरसों, मटर, चना', isActive: month >= 10 || month <= 2 },
+      { season: 'जायद (मार्च-जून)', crops: 'तरबूज, मूंग, खीरा', isActive: month >= 2 && month <= 5 }
     ],
     bn: [
-      { season: 'খরিফ (জুন-অক্টোবর)', crops: 'চাল, ভুট্টা, তুলা' },
-      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষা, মটর' },
-      { season: 'জায়েদ (মার্চ-জুন)', crops: 'তরমুজ, মুগ' }
+      { season: 'খরিফ (জুন-অক্টোবর)', crops: 'ধান, ভুট্টা, তুলা, সয়াবিন', isActive: month >= 5 && month <= 9 },
+      { season: 'রবি (নভেম্বর-মার্চ)', crops: 'গম, সরিষা, মটর, ছোলা', isActive: month >= 10 || month <= 2 },
+      { season: 'জায়েদ (মার্চ-জুন)', crops: 'তরমুজ, মুগ, শসা', isActive: month >= 2 && month <= 5 }
     ],
     ta: [
-      { season: 'காரிஃப் (ஜூன்-அக்டோபர்)', crops: 'அரிசி, சோளம், பருத்தி' },
-      { season: 'ரபி (நவம்பர்-மார்ச்)', crops: 'கோதுமை, கடுகு, பட்டாணி' },
-      { season: 'சையத் (மார்ச்-ஜூன்)', crops: 'தர்பூசணி, பாசிப்பயறு' }
+      { season: 'காரிஃப் (ஜூன்-அக்டோபர்)', crops: 'நெல், மக்காச்சோளம், பருத்தி, சோயாபீன்', isActive: month >= 5 && month <= 9 },
+      { season: 'ரபி (நவம்பர்-மார்ச்)', crops: 'கோதுமை, கடுகு, பட்டாணி, கடலை', isActive: month >= 10 || month <= 2 },
+      { season: 'சையத் (மார்ச்-ஜூன்)', crops: 'தர்பூசணி, பாசிப்பயறு, வெள்ளரி', isActive: month >= 2 && month <= 5 }
     ],
     mr: [
-      { season: 'खरीप (जून-ऑक्टोबर)', crops: 'तांदूळ, मका, कापूस' },
-      { season: 'रब्बी (नोव्हेंबर-मार्च)', crops: 'गहू, मोहरी, मटार' },
-      { season: 'जायद (मार्च-जून)', crops: 'कलिंगड, मूग' }
+      { season: 'खरीप (जून-ऑक्टोबर)', crops: 'तांदूळ, मका, कापूस, सोयाबीन', isActive: month >= 5 && month <= 9 },
+      { season: 'रब्बी (नोव्हेंबर-मार्च)', crops: 'गहू, मोहरी, मटार, हरभरा', isActive: month >= 10 || month <= 2 },
+      { season: 'जायद (मार्च-जून)', crops: 'कलिंगड, मूग, काकडी', isActive: month >= 2 && month <= 5 }
     ]
   };
-  return data[lang] || data.en;
+  
+  const seasonData = seasons[lang as keyof typeof seasons] || seasons.en;
+  
+  // Add current season indicator
+  return seasonData.map(s => ({
+    season: s.season + (s.isActive ? ' 🌱 (Current)' : ''),
+    crops: s.crops,
+    isActive: s.isActive
+  }));
 };
 
 const chartConfig = {
@@ -267,34 +318,72 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
+  const [marketData, setMarketData] = useState(() => getDynamicMarketData(language.id));
+  const [seasonData, setSeasonData] = useState(() => getDynamicSeasonData(language.id));
+
+  // Update market data when language changes or date changes
+  useEffect(() => {
+    setMarketData(getDynamicMarketData(language.id));
+    setSeasonData(getDynamicSeasonData(language.id));
+  }, [language.id]);
 
   const t = useMemo(() => UI_STRINGS[language.id] || UI_STRINGS.en, [language.id]);
 
-  const speakLocal = useCallback((text: string) => {
+  const getSpeechLangCode = useCallback((langId: string): string => {
+    const langMap: Record<string, string> = {
+      en: 'en-IN',
+      hi: 'hi-IN',
+      bn: 'bn-IN',
+      ta: 'ta-IN',
+      mr: 'mr-IN'
+    };
+    return langMap[langId] || 'en-IN';
+  }, []);
+
+  const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
+    const newMsg = { ...msg, id: Math.random().toString(36).substr(2, 9) };
+    setMessages(prev => [...prev, newMsg]);
+    return newMsg.id;
+  }, []);
+
+  const speakLocal = useCallback((text: string, forceLanguage?: string) => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const langMap: Record<string, string> = {
-        en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
-      };
       
-      const targetLang = langMap[language.id] || 'en-IN';
-      utterance.lang = targetLang;
-      utterance.rate = 0.95; // Slightly slower for clarity
-      utterance.pitch = 1.0;
-      
-      // Select best voice if available
-      const voices = window.speechSynthesis.getVoices();
-      const voice = voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
-      if (voice) utterance.voice = voice;
-      
-      window.speechSynthesis.speak(utterance);
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const targetLang = forceLanguage || getSpeechLangCode(language.id);
+        utterance.lang = targetLang;
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+        
+        const voices = window.speechSynthesis.getVoices();
+        let voice = voices.find(v => v.lang === targetLang);
+        
+        if (!voice) {
+          const langPrefix = targetLang.split('-')[0];
+          voice = voices.find(v => v.lang.startsWith(langPrefix));
+        }
+        
+        if (!voice && (targetLang === 'hi-IN' || targetLang === 'ta-IN' || targetLang === 'bn-IN' || targetLang === 'mr-IN')) {
+          voice = voices.find(v => v.lang === targetLang && (v.name.includes('Google') || v.name.includes('Premium')));
+        }
+        
+        if (voice) utterance.voice = voice;
+        
+        utterance.onerror = (event) => {
+          console.warn('Speech synthesis error:', event);
+        };
+        
+        window.speechSynthesis.speak(utterance);
+      }, 50);
     }
-  }, [language.id]);
+  }, [language.id, getSpeechLangCode]);
 
   const playAudio = useCallback((base64Audio: string) => {
     if (audioRef.current) {
@@ -335,7 +424,6 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
       if (result.responseAudio) {
         playAudio(result.responseAudio);
       } else {
-        // Fallback to local synthesis if flow audio fails
         speakLocal(result.responseText);
       }
     } catch (error) {
@@ -344,39 +432,47 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     } finally {
       setIsProcessing(false);
     }
-  }, [language.id, messages, t.error, isProcessing, playAudio, speakLocal]);
-
-  const addMessage = useCallback((msg: Omit<Message, 'id'>) => {
-    const newMsg = { ...msg, id: Math.random().toString(36).substr(2, 9) };
-    setMessages(prev => [...prev, newMsg]);
-    return newMsg.id;
-  }, []);
+  }, [language.id, messages, t.error, isProcessing, playAudio, speakLocal, addMessage]);
 
   useEffect(() => {
-    const welcomeText = t.greeting;
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: welcomeText,
-        suggestions: []
-      }
-    ]);
-    
-    // Trigger localized greeting immediately using local voice (no AI needed for first Hi)
-    const timer = setTimeout(() => speakLocal(welcomeText), 100);
+    const loadVoicesAndSpeak = () => {
+      setVoicesLoaded(true);
+      const welcomeText = t.greeting;
+      setMessages([
+        {
+          id: 'welcome',
+          role: 'assistant',
+          content: welcomeText,
+          suggestions: []
+        }
+      ]);
+      
+      setTimeout(() => {
+        speakLocal(welcomeText);
+      }, 100);
+    };
 
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        loadVoicesAndSpeak();
+      } else {
+        window.speechSynthesis.addEventListener('voiceschanged', loadVoicesAndSpeak);
+        return () => {
+          window.speechSynthesis.removeEventListener('voiceschanged', loadVoicesAndSpeak);
+        };
+      }
+    }
+  }, [t.greeting, speakLocal, language.id]);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
-        
-        const localeMap: Record<string, string> = {
-          en: 'en-IN', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN', mr: 'mr-IN'
-        };
-        recognitionRef.current.lang = localeMap[language.id] || 'en-IN';
+        recognitionRef.current.lang = getSpeechLangCode(language.id);
 
         recognitionRef.current.onresult = (event: any) => {
           const text = event.results[0][0].transcript;
@@ -390,13 +486,18 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     }
     
     return () => {
-      clearTimeout(timer);
       if (recognitionRef.current) recognitionRef.current.abort();
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
     };
-  }, [language.id, t.greeting, speakLocal]);
+  }, [language.id, processResponse, getSpeechLangCode]);
+
+  useEffect(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = getSpeechLangCode(language.id);
+    }
+  }, [language.id, getSpeechLangCode]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -410,13 +511,16 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     if (action === t.diseaseLabel) {
       await processResponse(`Assistant prompt: ${t.diseasePrompt}`, true);
     } else if (action === t.marketLabel) {
-      const marketData = getLocalizedMarketData(language.id);
-      const dataSummary = marketData.map(d => `${d.name} is ₹${d.price}`).join(", ");
-      await processResponse(`Mandi report: ${dataSummary}. ${t.marketPrompt}`, true, 'market_data');
+      // Update market data before showing
+      const freshMarketData = getDynamicMarketData(language.id);
+      setMarketData(freshMarketData);
+      const dataSummary = freshMarketData.map(d => `${d.name} is ₹${d.price}`).join(", ");
+      await processResponse(`Mandi report for ${new Date().toLocaleDateString()}: ${dataSummary}. ${t.marketPrompt}`, true, 'market_data');
     } else if (action === t.weatherLabel) {
-      const seasonData = getLocalizedSeasonData(language.id);
-      const dataSummary = seasonData.map(d => `In ${d.season}, best crops are ${d.crops}`).join(". ");
-      await processResponse(`Weather update: ${dataSummary}. ${t.weatherPrompt}`, true, 'weather_data');
+      const freshSeasonData = getDynamicSeasonData(language.id);
+      setSeasonData(freshSeasonData);
+      const dataSummary = freshSeasonData.map(d => `In ${d.season}, best crops are ${d.crops}`).join(". ");
+      await processResponse(`Weather update for ${new Date().toLocaleDateString()}: ${dataSummary}. ${t.weatherPrompt}`, true, 'weather_data');
     } else if (action === t.guideLabel) {
       await processResponse(`User guide: ${t.guidePrompt}`, true, 'guide_data');
     } else {
@@ -474,50 +578,161 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
 
   const formatMessageContent = (content: string) => {
     if (!content) return null;
-    return content.split('\n').map((line, i) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) return <div key={i} className="h-2" />;
 
-      if (trimmedLine.match(/^[A-Z\s\u0900-\u097F\u0980-\u09FF\u0B80-\u0BFF\u0C00-\u0C7F]+:$/)) {
-        return (
-          <div key={i} className="font-bold text-primary mt-6 mb-2 uppercase tracking-widest text-xs border-b border-primary/20 pb-1.5">
+    // ===== NORMALIZE TEXT BEFORE RENDERING =====
+    let normalizedContent = content;
+
+    // Force every bullet to begin on a new line
+    normalizedContent = normalizedContent
+      .replace(/\s*([•·*-])\s+/g, '\n$1 ')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/^\n/, '');
+
+    // Force headings like SOIL PREPARATION:
+    // to start on their own line
+    normalizedContent = normalizedContent.replace(
+      /([^\n])\s+([A-Z][A-Z\s]{2,}:)/g,
+      '$1\n\n$2'
+    );
+
+    const lines = normalizedContent.split('\n');
+
+    const elements = [];
+    let isFirstElement = true;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmedLine = line.trim();
+
+      // Empty line spacing
+      if (!trimmedLine) {
+        elements.push(<div key={i} className="h-3" />);
+        continue;
+      }
+
+      // ALL CAPS headings
+      if (
+        trimmedLine.match(
+          /^[A-Z\s\u0900-\u097F\u0980-\u09FF\u0B80-\u0BFF\u0C00-\u0C7F]+:$/
+        )
+      ) {
+        elements.push(
+          <div
+            key={i}
+            className="font-bold text-primary mt-5 mb-2 uppercase tracking-wider text-xs border-b border-primary/20 pb-2"
+          >
             {trimmedLine}
           </div>
         );
+
+        isFirstElement = false;
+        continue;
       }
 
-      if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
-        const text = trimmedLine.substring(1).trim();
-        return (
-          <div key={i} className="flex gap-3 ml-1 my-2.5 items-start">
-            <span className="text-primary mt-1 text-base">•</span>
-            <span className="text-sm leading-relaxed text-foreground font-medium">{text}</span>
-          </div>
-        );
+      // Bullet points
+      if (
+        trimmedLine.startsWith('•') ||
+        trimmedLine.startsWith('-') ||
+        trimmedLine.startsWith('*') ||
+        trimmedLine.startsWith('·')
+      ) {
+        let bulletContent = trimmedLine
+          .replace(/^[•\-*·]\s*/, '')
+          .trim();
+
+        if (bulletContent) {
+          elements.push(
+            <div
+              key={i}
+              className="flex gap-3 my-2 items-start ml-2"
+            >
+              <span className="text-primary mt-0.5 text-base flex-shrink-0">
+                •
+              </span>
+
+              <span className="text-sm leading-relaxed text-foreground/90 break-words flex-1">
+                {bulletContent}
+              </span>
+            </div>
+          );
+        }
+
+        isFirstElement = false;
+        continue;
       }
 
-      return <p key={i} className="text-sm leading-relaxed my-2 text-foreground/90 break-words">{trimmedLine}</p>;
-    });
+      // Heading with colon
+      if (
+        trimmedLine.includes(':') &&
+        trimmedLine.length < 60 &&
+        !trimmedLine.startsWith('•')
+      ) {
+        const firstChar = trimmedLine.charAt(0);
+
+        if (
+          firstChar === firstChar.toUpperCase() ||
+          /[A-Z]/.test(firstChar)
+        ) {
+          elements.push(
+            <div
+              key={i}
+              className="font-semibold text-foreground mt-4 mb-1"
+            >
+              {trimmedLine}
+            </div>
+          );
+        } else {
+          elements.push(
+            <p
+              key={i}
+              className="text-sm leading-relaxed my-2 text-foreground/90 break-words whitespace-normal"
+            >
+              {trimmedLine}
+            </p>
+          );
+        }
+
+        isFirstElement = false;
+        continue;
+      }
+
+      // Regular paragraph
+      elements.push(
+        <p
+          key={i}
+          className="text-sm leading-relaxed my-2 text-foreground/90 break-words whitespace-normal"
+        >
+          {trimmedLine}
+        </p>
+      );
+
+      isFirstElement = false;
+    }
+
+    return elements;
   };
 
   const renderSpecialContent = (msg: Message) => {
     if (msg.type === 'market_data') {
-      const marketData = getLocalizedMarketData(language.id);
       return (
         <div className="space-y-4 w-full overflow-hidden mb-4">
-          <div className="bg-white/95 rounded-2xl border border-primary/10 overflow-hidden shadow-sm">
-            <Table className="w-full">
+          <div className="bg-white/95 rounded-2xl border border-primary/10 overflow-x-auto shadow-sm">
+            <Table className="w-full min-w-[200px]">
               <TableHeader className="bg-primary/5">
                 <TableRow>
                   <TableHead className="text-xs font-bold text-primary px-3">{t.cropHeader}</TableHead>
                   <TableHead className="text-xs font-bold text-primary text-right px-3">{t.priceHeader}</TableHead>
+                  <TableHead className="text-xs font-bold text-primary text-right px-3">Trend</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {marketData.map((crop) => (
                   <TableRow key={crop.name} className="hover:bg-transparent">
-                    <TableCell className="text-xs py-2 px-3">{crop.name}</TableCell>
-                    <TableCell className="text-xs py-2 px-3 text-right font-medium">₹{crop.price}</TableCell>
+                    <TableCell className="text-xs py-2 px-3 break-words">{crop.name}</TableCell>
+                    <TableCell className="text-xs py-2 px-3 text-right font-medium whitespace-nowrap">₹{crop.price}</TableCell>
+                    <TableCell className="text-xs py-2 px-3 text-right">
+                      {crop.trend === 'up' ? '📈' : crop.trend === 'down' ? '📉' : '➡️'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -525,7 +740,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           </div>
           
           <div className="bg-white/95 p-4 rounded-2xl border border-primary/10 shadow-sm h-52 w-full overflow-hidden">
-            <h4 className="text-[10px] font-bold text-primary/60 uppercase mb-3">{t.trendLabel}</h4>
+            <h4 className="text-[10px] font-bold text-primary/60 uppercase mb-3">{t.trendLabel} (as of {new Date().toLocaleDateString()})</h4>
             <div className="h-36 w-full">
               <ChartContainer config={chartConfig} className="h-full w-full">
                 <ReChartsBarChart data={marketData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
@@ -543,11 +758,10 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
     }
 
     if (msg.type === 'weather_data') {
-      const seasonData = getLocalizedSeasonData(language.id);
       return (
         <div className="space-y-4 w-full overflow-hidden mb-4">
-          <div className="bg-white/95 rounded-2xl border border-primary/10 overflow-hidden shadow-sm">
-            <Table className="w-full">
+          <div className="bg-white/95 rounded-2xl border border-primary/10 overflow-x-auto shadow-sm">
+            <Table className="w-full min-w-[250px]">
               <TableHeader className="bg-primary/5">
                 <TableRow>
                   <TableHead className="text-xs font-bold text-primary px-3">{t.seasonHeader}</TableHead>
@@ -555,14 +769,17 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {seasonData.map((row) => (
-                  <TableRow key={row.season} className="hover:bg-transparent">
-                    <TableCell className="text-[11px] py-2 px-3 font-medium">{row.season}</TableCell>
-                    <TableCell className="text-[11px] py-2 px-3 text-muted-foreground">{row.crops}</TableCell>
+                {seasonData.map((row, idx) => (
+                  <TableRow key={idx} className="hover:bg-transparent">
+                    <TableCell className="text-[11px] py-2 px-3 font-medium break-words">{row.season}</TableCell>
+                    <TableCell className="text-[11px] py-2 px-3 text-muted-foreground break-words">{row.crops}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+          </div>
+          <div className="text-center text-[10px] text-primary/50">
+            Based on current date: {new Date().toLocaleDateString()}
           </div>
         </div>
       );
@@ -576,10 +793,10 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
             <span className="font-bold text-sm">How to use Bhoomi</span>
           </div>
           <div className="space-y-3 text-xs leading-relaxed text-foreground/80">
-            <div className="flex gap-2"><b>•</b> <span><b>Voice Chat:</b> Tap the Mic button and speak in your local language.</span></div>
-            <div className="flex gap-2"><b>•</b> <span><b>Photo Upload:</b> Use the Paperclip icon to send photos of sick crops.</span></div>
-            <div className="flex gap-2"><b>•</b> <span><b>Fast Actions:</b> Use the top buttons for instant Market and Weather help.</span></div>
-            <div className="flex gap-2"><b>•</b> <span><b>Smart Suggestions:</b> Tap the bubbles below my messages for follow-up questions.</span></div>
+            <div className="flex gap-2"><span className="text-primary flex-shrink-0">•</span> <span className="break-words"><b>Voice Chat:</b> Tap the Mic button and speak in your local language.</span></div>
+            <div className="flex gap-2"><span className="text-primary flex-shrink-0">•</span> <span className="break-words"><b>Photo Upload:</b> Use the Paperclip icon to send photos of sick crops.</span></div>
+            <div className="flex gap-2"><span className="text-primary flex-shrink-0">•</span> <span className="break-words"><b>Fast Actions:</b> Use the top buttons for instant Market and Weather help.</span></div>
+            <div className="flex gap-2"><span className="text-primary flex-shrink-0">•</span> <span className="break-words"><b>Smart Suggestions:</b> Tap the bubbles below my messages for follow-up questions.</span></div>
           </div>
         </div>
       );
@@ -588,37 +805,97 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
   };
 
   return (
-    <div className="mobile-stage flex flex-col bg-white nature-bg relative overflow-hidden">
-      {/* Background Animated Layer */}
+    <div className="mobile-stage flex flex-col bg-gradient-to-b from-emerald-50/40 via-green-50/30 to-amber-50/20 nature-bg relative overflow-hidden">
+      {/* Enhanced Animated Nature Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-12 left-10 w-48 h-48 opacity-30 animate-cloud text-blue-300">
-          <Cloud className="w-full h-full" />
-        </div>
-        <div className="absolute top-1/4 right-10 w-32 h-32 opacity-25 animate-float-nature text-green-500/40">
-          <Leaf className="w-full h-full" />
-        </div>
-        <div className="absolute top-1/2 left-4 w-20 h-20 opacity-20 animate-float-nature text-yellow-400/30" style={{ animationDelay: '3s' }}>
-          <Sun className="w-full h-full" />
+        {/* Animated Sun */}
+        <div className="absolute top-8 right-8 w-32 h-32 opacity-60 animate-float-sun">
+          <Sun className="w-full h-full text-yellow-400/50 drop-shadow-xl" />
         </div>
         
-        {/* Grass/Crop swaying at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-56 flex items-end justify-around px-8 opacity-60 z-0">
-          {[...Array(14)].map((_, i) => (
+        {/* Animated Clouds */}
+        <div className="absolute top-16 left-1/4 w-40 h-28 opacity-40 animate-cloud-1">
+          <Cloud className="w-full h-full text-blue-200/60" />
+        </div>
+        <div className="absolute top-32 left-2/3 w-32 h-24 opacity-30 animate-cloud-2">
+          <Cloud className="w-full h-full text-blue-200/50" />
+        </div>
+        
+        {/* Floating Water Droplets */}
+        <div className="absolute top-1/3 left-8 w-8 h-8 opacity-20 animate-float-droplet">
+          <Droplets className="w-full h-full text-blue-400" />
+        </div>
+        <div className="absolute bottom-1/3 right-12 w-6 h-6 opacity-20 animate-float-droplet-delayed">
+          <Droplets className="w-full h-full text-blue-400" />
+        </div>
+        
+        {/* Wind effect lines */}
+        <div className="absolute top-1/4 left-0 w-full h-32 pointer-events-none overflow-hidden">
+          <div className="absolute top-4 left-[-100px] w-40 h-0.5 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-wind-1"></div>
+          <div className="absolute top-8 left-[-50px] w-32 h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-wind-2"></div>
+          <div className="absolute top-12 left-[-150px] w-48 h-0.5 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-wind-3"></div>
+        </div>
+        
+        {/* Flying pollen particles */}
+        <div className="absolute top-1/2 left-1/4 w-1.5 h-1.5 rounded-full bg-yellow-300/50 animate-pollen-1"></div>
+        <div className="absolute top-2/3 left-1/3 w-1 h-1 rounded-full bg-green-300/50 animate-pollen-2"></div>
+        <div className="absolute top-1/3 right-1/4 w-2 h-2 rounded-full bg-yellow-200/40 animate-pollen-3"></div>
+        
+        {/* Farm Field / Swaying Small Plants at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-72 bg-gradient-to-t from-green-800/20 via-green-600/10 to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-56 flex items-end justify-around px-4 z-0">
+          {[...Array(20)].map((_, i) => (
             <div 
               key={i} 
-              className="w-10 h-36 animate-sway-intense text-primary/40" 
-              style={{ 
-                animationDelay: `${i * 0.3}s`, 
-                transformOrigin: 'bottom center'
+              className="relative"
+              style={{
+                animation: `sway-plant ${2 + (i % 4)}s ease-in-out infinite`,
+                animationDelay: `${i * 0.15}s`,
+                transformOrigin: 'bottom center',
+                width: `${20 + (i % 15)}px`,
               }}
             >
-              <Sprout className="w-full h-full stroke-[1.5]" />
+              <Sprout 
+                className="text-green-600/40 stroke-[1.5]" 
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  filter: `blur(${i % 2 === 0 ? '0px' : '0.5px'})`
+                }}
+              />
             </div>
           ))}
         </div>
+        
+        {/* Additional small plant stalks */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 flex items-end justify-around px-8 z-0 opacity-60">
+          {[...Array(15)].map((_, i) => (
+            <div 
+              key={`plant-${i}`}
+              className="relative"
+              style={{
+                animation: `sway-plant ${3 + (i % 3)}s ease-in-out infinite alternate`,
+                animationDelay: `${i * 0.2}s`,
+                transformOrigin: 'bottom center',
+                width: `${15 + (i % 10)}px`,
+              }}
+            >
+              <Leaf 
+                className="text-green-500/30"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+        
+        {/* Decorative soil/ground line */}
+        <div className="absolute bottom-12 left-0 w-full h-12 bg-gradient-to-t from-amber-900/20 via-amber-800/10 to-transparent" />
       </div>
 
-      <div className="p-4 flex items-center justify-between border-b bg-primary text-white z-20 shrink-0">
+      <div className="p-4 flex items-center justify-between border-b bg-primary text-white z-20 shrink-0 shadow-lg">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => window.location.reload()}>
             <ChevronLeft className="w-6 h-6" />
@@ -659,7 +936,7 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div 
-                className={`max-w-[88%] rounded-3xl p-5 shadow-lg transition-all animate-in fade-in slide-in-from-bottom-3 relative z-20 overflow-hidden ${
+                className={`max-w-[85%] rounded-3xl p-5 shadow-lg transition-all animate-in fade-in slide-in-from-bottom-3 relative z-20 overflow-x-auto ${
                   msg.role === 'user' 
                   ? 'bg-primary text-white rounded-tr-none ml-auto border border-primary/20' 
                   : 'bg-white/95 backdrop-blur-xl text-foreground rounded-tl-none border border-primary/10 mr-auto shadow-[0_15px_40px_rgba(0,0,0,0.08)]'
@@ -671,19 +948,19 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
                 
                 {renderSpecialContent(msg)}
 
-                <div className="whitespace-pre-line w-full text-[15px] leading-relaxed font-medium">
+                <div className="whitespace-pre-wrap break-words w-full text-[15px] leading-relaxed font-medium">
                   {msg.role === 'assistant' ? formatMessageContent(msg.content) : msg.content}
                 </div>
               </div>
               
               {msg.suggestions && msg.suggestions.length > 0 && !isProcessing && (
-                <div className="mt-4 flex flex-wrap gap-2 justify-start max-w-[95%] relative z-20 px-2">
+                <div className="mt-4 flex flex-wrap gap-2 justify-start max-w-[85%] relative z-20 px-2">
                   {msg.suggestions.map((suggestion, idx) => (
                     <Button 
                       key={idx} 
                       variant="outline" 
                       size="sm" 
-                      className="text-[11px] h-8 rounded-full bg-white/95 backdrop-blur-md border-primary/20 text-primary hover:bg-primary hover:text-white transition-all px-4 shadow-sm font-bold"
+                      className="text-[11px] h-8 rounded-full bg-white/95 backdrop-blur-md border-primary/20 text-primary hover:bg-primary hover:text-white transition-all px-4 shadow-sm font-bold whitespace-normal break-words"
                       onClick={() => handleAction(suggestion)}
                     >
                       {suggestion}
@@ -750,6 +1027,107 @@ export function BhoomiApp({ language }: BhoomiAppProps) {
           </button>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes sway-plant {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(4deg); }
+          75% { transform: rotate(-4deg); }
+        }
+        @keyframes sway-plant-alt {
+          0%, 100% { transform: rotate(0deg); }
+          33% { transform: rotate(3deg); }
+          66% { transform: rotate(-3deg); }
+        }
+        @keyframes float-sun {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-10px) scale(1.05); }
+        }
+        @keyframes cloud-1 {
+          0% { transform: translateX(-20px); opacity: 0.4; }
+          50% { transform: translateX(20px); opacity: 0.6; }
+          100% { transform: translateX(-20px); opacity: 0.4; }
+        }
+        @keyframes cloud-2 {
+          0% { transform: translateX(20px); opacity: 0.3; }
+          50% { transform: translateX(-20px); opacity: 0.5; }
+          100% { transform: translateX(20px); opacity: 0.3; }
+        }
+        @keyframes float-droplet {
+          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
+          50% { transform: translateY(-20px) rotate(10deg); opacity: 0.4; }
+        }
+        @keyframes wind-1 {
+          0% { transform: translateX(-100px); opacity: 0; }
+          50% { opacity: 0.4; }
+          100% { transform: translateX(100vw); opacity: 0; }
+        }
+        @keyframes wind-2 {
+          0% { transform: translateX(-50px); opacity: 0; }
+          50% { opacity: 0.3; }
+          100% { transform: translateX(100vw); opacity: 0; }
+        }
+        @keyframes wind-3 {
+          0% { transform: translateX(-150px); opacity: 0; }
+          50% { opacity: 0.35; }
+          100% { transform: translateX(100vw); opacity: 0; }
+        }
+        @keyframes pollen-1 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+          100% { transform: translate(50px, -100px) scale(0); opacity: 0; }
+        }
+        @keyframes pollen-2 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+          100% { transform: translate(-60px, -80px) scale(0); opacity: 0; }
+        }
+        @keyframes pollen-3 {
+          0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+          100% { transform: translate(40px, -120px) scale(0); opacity: 0; }
+        }
+        .animate-sway-plant {
+          animation: sway-plant infinite ease-in-out;
+        }
+        .animate-float-sun {
+          animation: float-sun 6s ease-in-out infinite;
+        }
+        .animate-cloud-1 {
+          animation: cloud-1 20s ease-in-out infinite;
+        }
+        .animate-cloud-2 {
+          animation: cloud-2 25s ease-in-out infinite;
+        }
+        .animate-float-droplet {
+          animation: float-droplet 4s ease-in-out infinite;
+        }
+        .animate-float-droplet-delayed {
+          animation: float-droplet 5s ease-in-out infinite 1s;
+        }
+        .animate-wind-1 {
+          animation: wind-1 8s linear infinite;
+        }
+        .animate-wind-2 {
+          animation: wind-2 10s linear infinite 2s;
+        }
+        .animate-wind-3 {
+          animation: wind-3 12s linear infinite 4s;
+        }
+        .animate-pollen-1 {
+          animation: pollen-1 6s ease-out infinite;
+        }
+        .animate-pollen-2 {
+          animation: pollen-2 7s ease-out infinite 1s;
+        }
+        .animate-pollen-3 {
+          animation: pollen-3 8s ease-out infinite 2.5s;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }
